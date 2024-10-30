@@ -1,13 +1,16 @@
+// pages/product/ProductCard.js
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useAuth } from "../app/context/AuthContext"; // Adjust the path as necessary
 import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const ProductCard = ({ product, isRecommendation = false }) => {
   const router = useRouter();
+  const { user } = useAuth(); // Get user from context
   const [userId, setUserId] = useState(null);
-  const [isInCart, setIsInCart] = useState(false); // Track if the product is in the cart
+  const [isInCart, setIsInCart] = useState(false);
 
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
@@ -25,9 +28,9 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       if (!product?.id || !userId) throw new Error("Product ID or User ID is undefined");
 
       const cartRef = doc(db, "users", userId, "cart", product.id);
-      
+
       if (isInCart) {
-        await deleteDoc(cartRef); // Remove from cart if already added
+        await deleteDoc(cartRef);
         alert("Product removed from cart!");
       } else {
         await setDoc(cartRef, {
@@ -37,7 +40,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
         alert("Product added to cart successfully!");
       }
 
-      setIsInCart((prev) => !prev); // Toggle the cart state
+      setIsInCart((prev) => !prev);
     } catch (error) {
       alert("Error updating cart: " + error.message);
       console.error("Error updating cart:", error);
@@ -64,10 +67,10 @@ const ProductCard = ({ product, isRecommendation = false }) => {
     const checkCartStatus = async () => {
       if (userId) {
         const cartDoc = await doc(db, "users", userId, "cart", product.id).get();
-        setIsInCart(cartDoc.exists()); // Check if product exists in cart
+        setIsInCart(cartDoc.exists());
       }
     };
-    
+
     checkCartStatus();
   }, [userId, product.id]);
 
@@ -90,49 +93,21 @@ const ProductCard = ({ product, isRecommendation = false }) => {
         />
       </div>
 
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
+        <h3 className="text-white text-lg font-bold">{product.title}</h3>
+        <p className="text-white">${product.price}</p>
         <button
+          className="bg-baw-red text-white py-2 px-4 rounded mt-2"
           onClick={handleBuyNow}
-          className="bg-white text-orange-500 font-bold py-2 px-4 mb-2 rounded"
         >
           Buy Now
         </button>
         <button
+          className="bg-gray-300 text-black py-1 px-3 rounded mt-2"
           onClick={handleAddToCart}
-          className={`border text-white font-bold py-2 px-4 rounded mb-4 ${
-            isInCart ? "border-red-600 bg-red-600" : "border-white bg-transparent"
-          }`}
         >
           {isInCart ? "Remove from Cart" : "Add to Cart"}
         </button>
-        <div className="flex space-x-6">
-          <button className="text-white text-sm">Share</button>
-          <button className="text-white text-sm">Compare</button>
-          <button onClick={handleAddToWishlist} className="text-white text-sm">
-            Like
-          </button>
-        </div>
-      </div>
-
-      <div className="py-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-black text-lg text-[#2C2C2C]">{product.title}</h3>
-          <span className="text-lg font-semibold text-gray-800">₹{product.price}</span>
-        </div>
-
-        <p className="text-gray-700 my-5 text-sm w-64">{product.description}</p>
-
-        <div className="flex items-center">
-          {Array.from({ length: Math.floor(product.rating) }, (_, index) => (
-            <img
-              key={index}
-              src="/images/common/star.png"
-              alt="star"
-              className="w-6 h-6"
-            />
-          ))}
-          <span className="text-gray-600 text-sm ml-4">({product.reviews})</span>
-        </div>
       </div>
     </div>
   );
