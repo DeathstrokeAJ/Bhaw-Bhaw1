@@ -1,12 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const ProductCard = ({ product, isRecommendation = false }) => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
+  const [isInCart, setIsInCart] = useState(false); // Track if the product is in the cart
 
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
@@ -24,14 +25,22 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       if (!product?.id || !userId) throw new Error("Product ID or User ID is undefined");
 
       const cartRef = doc(db, "users", userId, "cart", product.id);
-      await setDoc(cartRef, {
-        ...product,
-        addedAt: serverTimestamp(),
-      });
-      alert("Product added to cart successfully!");
+      
+      if (isInCart) {
+        await deleteDoc(cartRef); // Remove from cart if already added
+        alert("Product removed from cart!");
+      } else {
+        await setDoc(cartRef, {
+          ...product,
+          addedAt: serverTimestamp(),
+        });
+        alert("Product added to cart successfully!");
+      }
+
+      setIsInCart((prev) => !prev); // Toggle the cart state
     } catch (error) {
-      alert("Error adding to cart: " + error.message);
-      console.error("Error adding to cart:", error);
+      alert("Error updating cart: " + error.message);
+      console.error("Error updating cart:", error);
     }
   };
 
@@ -50,6 +59,17 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       console.error("Error adding to wishlist:", error);
     }
   };
+
+  useEffect(() => {
+    const checkCartStatus = async () => {
+      if (userId) {
+        const cartDoc = await doc(db, "users", userId, "cart", product.id).get();
+        setIsInCart(cartDoc.exists()); // Check if product exists in cart
+      }
+    };
+    
+    checkCartStatus();
+  }, [userId, product.id]);
 
   return (
     <div className="relative rounded font-montserrat overflow-hidden p-4 group shadow-lg bg-white">
@@ -79,9 +99,11 @@ const ProductCard = ({ product, isRecommendation = false }) => {
         </button>
         <button
           onClick={handleAddToCart}
-          className="border border-white text-white font-bold py-2 px-4 rounded mb-4"
+          className={`border text-white font-bold py-2 px-4 rounded mb-4 ${
+            isInCart ? "border-red-600 bg-red-600" : "border-white bg-transparent"
+          }`}
         >
-          Add to Cart
+          {isInCart ? "Remove from Cart" : "Add to Cart"}
         </button>
         <div className="flex space-x-6">
           <button className="text-white text-sm">Share</button>
@@ -95,9 +117,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       <div className="py-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-black text-lg text-[#2C2C2C]">{product.title}</h3>
-          <span className="text-lg font-semibold text-gray-800">
-            ₹{product.price}
-          </span>
+          <span className="text-lg font-semibold text-gray-800">₹{product.price}</span>
         </div>
 
         <p className="text-gray-700 my-5 text-sm w-64">{product.description}</p>
