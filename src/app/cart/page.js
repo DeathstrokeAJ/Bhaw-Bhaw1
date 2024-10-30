@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from "react";
 import { db } from "../../../firebaseConfig"; 
 import { collection, query, where, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";

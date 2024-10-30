@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState } from 'react';
 import ProductCard from "../../components/ProductCard";
 import { CiStar } from "react-icons/ci";
