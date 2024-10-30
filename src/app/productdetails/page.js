@@ -7,6 +7,7 @@ import { AiOutlineHeart } from "react-icons/ai";
 import { db } from '../../../firebaseConfig';
 import { doc, getDoc, collection, getDocs, query, where, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
+import Image from 'next/image';
 
 const ProductDetail = () => {
   const router = useRouter(); // Initialize the router
@@ -20,6 +21,12 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const productId = sessionStorage.getItem("productId");
+    
+    if (!productId) {
+      console.error("Product ID is not available in session storage.");
+      router.push('/'); // Navigate to a fallback page, e.g., home page
+      return;
+    }
 
     const fetchProductDetails = async () => {
       const productRef = doc(db, 'products', productId);
@@ -41,7 +48,7 @@ const ProductDetail = () => {
     };
 
     fetchProductDetails();
-  }, []);
+  }, [router]);
 
   const handleQuantityChange = (type) => {
     setQuantity((prevQuantity) =>
@@ -91,10 +98,12 @@ const ProductDetail = () => {
     <div className="container mx-auto p-6 bg-white text-black font-poppins">
       <div className="flex flex-col lg:flex-row lg:space-x-12">
         <div className="w-full lg:w-1/2 h-auto mb-6 lg:mb-0 bg-gray-200 flex items-center justify-center">
-          <img
+          <Image
             className="w-full object-contain"
             src={product.images}
             alt={product.title}
+            width={500}
+            height={500}
           />
         </div>
 
@@ -179,7 +188,8 @@ const ProductDetail = () => {
           <div className="mt-4 border-t pt-4">
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <img src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" />
+                <Image src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" width={32} 
+      height={32}  />
               </div>
               <div>
                 <p className="text-black">Free Delivery</p>
@@ -188,28 +198,33 @@ const ProductDetail = () => {
             </div>
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <img src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" />
+                <Image src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
+      height={32}  />
               </div>
               <div>
                 <p className="text-black">Return</p>
-                <p className="text-sm text-black underline">Free 30 Days Delivery Returns. Details</p>
+                <p className="text-sm text-black underline">Free 30 Days Return</p>
+              </div>
+            </div>
+            <div className="border flex py-4 px-2 mb-2 rounded-md">
+              <div className="flex items-center space-x-2">
+                <Image src="/images/products/truck.png" alt="Warranty" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
+      height={32} />
+              </div>
+              <div>
+                <p className="text-black">Warranty</p>
+                <p className="text-sm text-black underline">1 Year Warranty</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-12">
-        <div className="flex items-center">
-          <div className="h-10 w-5 mr-5 bg-gray-500" />
-          <h2 className="text-2xl font-bold">Related Products</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {relatedProducts.map((relatedProduct) => (
-            <ProductCard key={relatedProduct.id} product={relatedProduct} />
-          ))}
-        </div>
+      <h2 className="text-2xl font-semibold mt-12 mb-4">Related Products</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedProducts.map((relatedProduct) => (
+          <ProductCard key={relatedProduct.id} product={relatedProduct} />
+        ))}
       </div>
     </div>
   );

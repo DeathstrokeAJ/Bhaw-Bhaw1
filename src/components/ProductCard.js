@@ -1,16 +1,20 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const ProductCard = ({ product, isRecommendation = false }) => {
   const router = useRouter();
-  const userId = sessionStorage.getItem("userId");
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const storedUserId = sessionStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
 
   const handleBuyNow = () => {
     const route = isRecommendation ? `/details` : `/productdetails`;
-    // Store productId in session storage
     sessionStorage.setItem("productId", product.id);
     router.push(route);
   };
