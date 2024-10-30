@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import Image from "next/image"; // Import the Image component from Next.js
+// import Image from "next/image"; // Import the Image component from Next.js
 
 const ProductDetails = () => {
   const [product, setProduct] = useState(null);
@@ -84,16 +84,16 @@ const ProductDetails = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-800">{product?.title || "Product Title"}</h1>
         <button onClick={handleAddToWishlist} className="flex items-center bg-[#FFEB3B] px-8 py-1 rounded-2xl">
-          <Image src="/images/navbar/heart.png" alt="Add to Wishlist" width={32} height={32} />
+          <img src="/images/navbar/heart.png" alt="Add to Wishlist" width={32} height={32} />
           <p>Add To Wishlist</p>
         </button>
       </div>
 
       <div className="rounded-lg p-6 flex justify-between items-start">
-        <Image src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={80} height={80} className="w-20 px-1 pt-2 pb-3 border border-black object-contain rounded-2xl" />
+        <img src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={80} height={80} className="w-20 px-1 pt-2 pb-3 border border-black object-contain rounded-2xl" />
 
         <div className="flex space-x-6">
-          <Image src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={256} height={256} className="w-64 object-contain rounded-md" />
+          <img src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={256} height={256} className="w-64 object-contain rounded-md" />
 
           <div className="space-y-4">
             <p className="text-sm">Brand: {product?.brand || "Kopman"}</p>
@@ -106,7 +106,7 @@ const ProductDetails = () => {
         <div className="flex flex-col border border-[#F5D1DD] rounded-xl w-[30%] p-4 items-start space-y-2">
           <div className="text-2xl text-black font-semibold">Rs. {product?.price || "Price not available"}</div>
           <div className="flex">
-            <Image src="/images/details/freedelivery.png" alt="Free Delivery" width={28} height={28} className="w-7 object-contain pr-1" />
+            <img src="/images/details/freedelivery.png" alt="Free Delivery" width={28} height={28} className="w-7 object-contain pr-1" />
             <div className="text-black">Free Delivery</div>
           </div>
 
@@ -117,7 +117,7 @@ const ProductDetails = () => {
           </div>
 
           <button onClick={handleAddToCart} className="bg-[#D4C6C0] text-black w-full py-[0.5rem] text-left px-2 text-xs rounded-md border flex items-center">
-            <Image src="/images/details/cart.png" alt="Add to Cart" width={28} height={28} className="w-7 object-contain pr-2" />
+            <img src="/images/details/cart.png" alt="Add to Cart" width={28} height={28} className="w-7 object-contain pr-2" />
             <p>Add To Cart</p>
           </button>
 

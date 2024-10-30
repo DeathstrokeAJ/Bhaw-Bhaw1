@@ -7,7 +7,7 @@ import { AiOutlineHeart } from "react-icons/ai";
 import { db } from '../../../firebaseConfig';
 import { doc, getDoc, collection, getDocs, query, where, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
-import Image from 'next/image';
+
 
 const ProductDetail = () => {
   const router = useRouter(); // Initialize the router
@@ -98,7 +98,7 @@ const ProductDetail = () => {
     <div className="container mx-auto p-6 bg-white text-black font-poppins">
       <div className="flex flex-col lg:flex-row lg:space-x-12">
         <div className="w-full lg:w-1/2 h-auto mb-6 lg:mb-0 bg-gray-200 flex items-center justify-center">
-          <Image
+          <img
             className="w-full object-contain"
             src={product.images}
             alt={product.title}
@@ -188,7 +188,7 @@ const ProductDetail = () => {
           <div className="mt-4 border-t pt-4">
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <Image src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" width={32} 
+                <img src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" width={32} 
       height={32}  />
               </div>
               <div>
@@ -198,7 +198,7 @@ const ProductDetail = () => {
             </div>
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <Image src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
+                <img src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
       height={32}  />
               </div>
               <div>
@@ -208,7 +208,7 @@ const ProductDetail = () => {
             </div>
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <Image src="/images/products/truck.png" alt="Warranty" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
+                <img src="/images/products/truck.png" alt="Warranty" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
       height={32} />
               </div>
               <div>
