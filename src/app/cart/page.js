@@ -25,6 +25,13 @@ const Cart = () => {
   };
 
   useEffect(() => {
+    const productId = sessionStorage.getItem("productId");
+    
+    if (!productId) {
+      console.error("Product ID is not available in session storage.");
+      router.push('/'); // Navigate to a fallback page, e.g., home page
+      return;
+    }
     const fetchCartItems = async () => {
       if (!userId) {
         console.error("User ID is not available.");
