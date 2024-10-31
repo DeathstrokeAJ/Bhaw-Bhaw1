@@ -1,8 +1,9 @@
-// Ensure Firebase is initialized correctly
+// Firebase initialization for Firestore and optional Analytics
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
+// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyBj5Ec8XNj9qSH-QXW4uaCugbMJeFzSBDA",
   authDomain: "bhaw-bhaw.firebaseapp.com",
@@ -13,13 +14,23 @@ const firebaseConfig = {
   measurementId: "G-8H9K8L77X6"
 };
 
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let analytics;
-isSupported().then(supported => {
-  if (supported) {
-    analytics = getAnalytics(app);
-  }
-});
 
-export { db };
+// Initialize Firestore
+const db = getFirestore(app);
+
+// Initialize Analytics if supported
+let analytics;
+isSupported()
+  .then(supported => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  })
+  .catch(error => {
+    console.error("Analytics support check failed:", error);
+  });
+
+// Export Firestore and Analytics (if initialized)
+export { db, analytics };

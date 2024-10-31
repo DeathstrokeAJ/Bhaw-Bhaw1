@@ -1,16 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
-// import Image from "next/image"; // Import the Image component from Next.js
+import React, { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../firebaseConfig";
+import { useAuth } from "../../app/context/AuthContext";
+import { useCartWishlist } from "../../app/context/CartWishlistContext";
+import { useRouter } from "next/navigation";
 
 const ProductDetails = () => {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { addToCart, addToWishlist, isInCart, isInWishlist } = useCartWishlist();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const productId = sessionStorage.getItem("productId");
-  const userId = sessionStorage.getItem("userId");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -34,32 +38,29 @@ const ProductDetails = () => {
   }, [productId]);
 
   const handleAddToCart = async () => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
     try {
-      if (!productId || !userId) throw new Error("Product ID or User ID is undefined");
-
-      const cartRef = doc(db, "users", userId, "cart", productId);
-      await setDoc(cartRef, {
-        ...product,
-        quantity,
-        addedAt: serverTimestamp(),
-      });
-      console.log("Product added to cart:", productId);
+      await addToCart(product, quantity);
+      alert("Product added to cart successfully!");
     } catch (error) {
+      alert("Error adding to cart: " + error.message);
       console.error("Error adding to cart:", error);
     }
   };
 
   const handleAddToWishlist = async () => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
     try {
-      if (!productId || !userId) throw new Error("Product ID or User ID is undefined");
-
-      const wishlistRef = doc(db, "users", userId, "wishlist", productId);
-      await setDoc(wishlistRef, {
-        ...product,
-        addedAt: serverTimestamp(),
-      });
-      console.log("Product added to wishlist:", productId);
+      await addToWishlist(product);
+      alert("Product added to wishlist!");
     } catch (error) {
+      alert("Error adding to wishlist: " + error.message);
       console.error("Error adding to wishlist:", error);
     }
   };
@@ -83,17 +84,33 @@ const ProductDetails = () => {
     <div className="p-10 font-poppins space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-800">{product?.title || "Product Title"}</h1>
-        <button onClick={handleAddToWishlist} className="flex items-center bg-[#FFEB3B] px-8 py-1 rounded-2xl">
+        <button
+          onClick={handleAddToWishlist}
+          className={`flex items-center ${isInWishlist(productId) ? 'bg-gray-300' : 'bg-[#FFEB3B]'} px-8 py-1 rounded-2xl`}
+          disabled={isInWishlist(productId)}
+        >
           <img src="/images/navbar/heart.png" alt="Add to Wishlist" width={32} height={32} />
           <p>Add To Wishlist</p>
         </button>
       </div>
 
       <div className="rounded-lg p-6 flex justify-between items-start">
-        <img src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={80} height={80} className="w-20 px-1 pt-2 pb-3 border border-black object-contain rounded-2xl" />
+        <img
+          src={product?.images || "/images/details/image.png"}
+          alt={product?.title || "Product Image"}
+          width={80}
+          height={80}
+          className="w-20 px-1 pt-2 pb-3 border border-black object-contain rounded-2xl"
+        />
 
         <div className="flex space-x-6">
-          <img src={product?.images || "/images/details/image.png"} alt={product?.title || "Product Image"} width={256} height={256} className="w-64 object-contain rounded-md" />
+          <img
+            src={product?.images || "/images/details/image.png"}
+            alt={product?.title || "Product Image"}
+            width={256}
+            height={256}
+            className="w-64 object-contain rounded-md"
+          />
 
           <div className="space-y-4">
             <p className="text-sm">Brand: {product?.brand || "Kopman"}</p>
@@ -106,7 +123,13 @@ const ProductDetails = () => {
         <div className="flex flex-col border border-[#F5D1DD] rounded-xl w-[30%] p-4 items-start space-y-2">
           <div className="text-2xl text-black font-semibold">Rs. {product?.price || "Price not available"}</div>
           <div className="flex">
-            <img src="/images/details/freedelivery.png" alt="Free Delivery" width={28} height={28} className="w-7 object-contain pr-1" />
+            <img
+              src="/images/details/freedelivery.png"
+              alt="Free Delivery"
+              width={28}
+              height={28}
+              className="w-7 object-contain pr-1"
+            />
             <div className="text-black">Free Delivery</div>
           </div>
 
@@ -116,7 +139,10 @@ const ProductDetails = () => {
             <button onClick={increaseQuantity} className="px-3 py-1 bg-gray-300 rounded-md">+</button>
           </div>
 
-          <button onClick={handleAddToCart} className="bg-[#D4C6C0] text-black w-full py-[0.5rem] text-left px-2 text-xs rounded-md border flex items-center">
+          <button
+            onClick={handleAddToCart}
+            className="bg-[#D4C6C0] text-black w-full py-[0.5rem] text-left px-2 text-xs rounded-md border flex items-center"
+          >
             <img src="/images/details/cart.png" alt="Add to Cart" width={28} height={28} className="w-7 object-contain pr-2" />
             <p>Add To Cart</p>
           </button>

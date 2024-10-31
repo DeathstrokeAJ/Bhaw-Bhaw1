@@ -1,7 +1,7 @@
 // pages/signin/SignInForm.js
 "use client";
 import React, { useEffect, useState, useContext } from "react";
-import { AuthContext } from "../../../context/AuthContext"; // Adjust the path as necessary
+import { useAuth } from "../context/AuthContext"; // Ensure the correct import path
 import logo from "../../../public/images/signin/Group.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,18 +11,17 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 
 const SignInForm = () => {
   const router = useRouter();
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useAuth(); // Use the useAuth hook to get user and setUser
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("currentUser");
-    if (storedUser) {
+    if (user) { // Redirect if user is already authenticated
       toast.success("Login successful");
       router.push("/");
     }
-  }, []);
+  }, [user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +37,7 @@ const SignInForm = () => {
         const userData = doc.data();
         if (userData.password === password) {
           userFound = true;
-          sessionStorage.setItem("currentUser", JSON.stringify(userData));
-          sessionStorage.setItem("userId", doc.id);
-          sessionStorage.setItem("isLoggedIn", "true");
-          setUser(userData); // Set user in context
+          setUser(userData); // Set user in context instead of sessionStorage
           toast.success("Login successful");
           router.push("/");
         }

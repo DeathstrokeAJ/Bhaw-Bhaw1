@@ -1,29 +1,32 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import ProductCard from "../../components/ProductCard";
 import { CiStar } from "react-icons/ci";
-import { AiFillHeart, AiFillStar } from "react-icons/ai";
-import { AiOutlineHeart } from "react-icons/ai";
+import { AiFillHeart, AiFillStar, AiOutlineHeart } from "react-icons/ai";
 import { db } from '../../../firebaseConfig';
-import { doc, getDoc, collection, getDocs, query, where, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useRouter } from 'next/navigation'; // Import useRouter for navigation
-
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { AuthContext } from '../../context/AuthContext'; // Import AuthContext
+import { CartWishlistContext } from '../../context/CartWishlistContext'; // Import CartWishlistContext
 
 const ProductDetail = () => {
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
+  const { user } = useContext(AuthContext); // Access user from AuthContext
+  const { addToCart, addToWishlist } = useContext(CartWishlistContext); // Access cart and wishlist methods
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const userId = sessionStorage.getItem("userId"); // Get the user ID from session storage
+  
+  const userId = user?.id; // Retrieve user ID from AuthContext
 
   useEffect(() => {
-    const productId = sessionStorage.getItem("productId");
+    const productId = router.query.productId; // Assuming you pass productId via query params
     
     if (!productId) {
-      console.error("Product ID is not available in session storage.");
+      console.error("Product ID is not available.");
       router.push('/'); // Navigate to a fallback page, e.g., home page
       return;
     }
@@ -57,35 +60,18 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
-    try {
-      if (!product?.id || !userId) throw new Error("Product ID or User ID is undefined");
-
-      const cartRef = doc(db, "users", userId, "cart", product.id);
-      await setDoc(cartRef, {
-        ...product,
-        quantity,
-        addedAt: serverTimestamp(),
-      });
+    if (product && userId) {
+      await addToCart(product, quantity); // Use context method
       console.log("Product added to cart:", product.id);
       router.push('/cart'); // Navigate to the cart page
-    } catch (error) {
-      console.error("Error adding to cart:", error);
     }
   };
 
   const handleAddToWishlist = async () => {
-    try {
-      if (!product?.id || !userId) throw new Error("Product ID or User ID is undefined");
-
-      const wishlistRef = doc(db, "users", userId, "wishlist", product.id);
-      await setDoc(wishlistRef, {
-        ...product,
-        addedAt: serverTimestamp(),
-      });
+    if (product && userId) {
+      await addToWishlist(product); // Use context method
       console.log("Product added to wishlist:", product.id);
       setIsFavorite(true); // Set favorite state to true
-    } catch (error) {
-      console.error("Error adding to wishlist:", error);
     }
   };
 
@@ -188,8 +174,7 @@ const ProductDetail = () => {
           <div className="mt-4 border-t pt-4">
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <img src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" width={32} 
-      height={32}  />
+                <img src="/images/products/truck.png" alt="Free Delivery" className="w-8 h-8 mr-2" width={32} height={32} />
               </div>
               <div>
                 <p className="text-black">Free Delivery</p>
@@ -198,8 +183,7 @@ const ProductDetail = () => {
             </div>
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <img src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
-      height={32}  />
+                <img src="/images/products/truck.png" alt="Return" className="w-8 h-8 mr-2" width={32} height={32} />
               </div>
               <div>
                 <p className="text-black">Return</p>
@@ -208,23 +192,24 @@ const ProductDetail = () => {
             </div>
             <div className="border flex py-4 px-2 mb-2 rounded-md">
               <div className="flex items-center space-x-2">
-                <img src="/images/products/truck.png" alt="Warranty" className="w-8 h-8 mr-2" width={32} // Set width for the truck image
-      height={32} />
+                <img src="/images/products/truck.png" alt="Secure Payment" className="w-8 h-8 mr-2" width={32} height={32} />
               </div>
               <div>
-                <p className="text-black">Warranty</p>
-                <p className="text-sm text-black underline">1 Year Warranty</p>
+                <p className="text-black">Secure Payment</p>
+                <p className="text-sm text-black underline">100% Secure Payment</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold mt-12 mb-4">Related Products</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {relatedProducts.map((relatedProduct) => (
-          <ProductCard key={relatedProduct.id} product={relatedProduct} />
-        ))}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Related Products</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {relatedProducts.map((relatedProduct) => (
+            <ProductCard key={relatedProduct.id} product={relatedProduct} />
+          ))}
+        </div>
       </div>
     </div>
   );
