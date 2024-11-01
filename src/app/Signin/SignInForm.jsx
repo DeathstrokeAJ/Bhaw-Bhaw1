@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext"; // Update the path if necessary
+import { useAuth } from "../context/AuthContext"; // Ensure this path is correct
 import logo from "../../../public/images/signin/Group.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 
 const SignInForm = () => {
   const router = useRouter();
-  const { user, setUser  } = useAuth();
+  const { user, setUser } = useAuth();  // Access user and setUser
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +37,7 @@ const SignInForm = () => {
         const userData = doc.data();
         if (userData.password === password) {
           userFound = true;
-          setUser ({ uid: doc.id, ...userData });
+          setUser({ uid: doc.id, ...userData }); // Set user data in context
           toast.success("Login successful");
           router.push("/"); // Redirect to home or desired page
         }
