@@ -1,7 +1,7 @@
 import React from 'react';
-import { AuthProvider } from './context/AuthContext'; // Ensure this is correct
+import { AuthProvider } from './context/AuthContext'; 
 import { CartWishlistProvider } from './context/CartWishlistContext';
-import SignInPage from './Signin/SignInPage'; // Adjust the import path if necessary
+import SignInPage from './signin/SignInPage';
 import ProductCard from '@/components/ProductCard';
 
 const App = () => {
