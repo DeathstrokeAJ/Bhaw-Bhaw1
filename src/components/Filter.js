@@ -87,42 +87,49 @@ function FilterComponent({ onFilter }) {
       {/* Price Section */}
       <div className="mb-6">
         <h3 className="text-lg mb-2">Price</h3>
-        <div className="flex items-center space-x-1">
-          <div className="flex flex-col items-start">
-            <label className="mr-2 text-sm">From</label>
-            <input
-              type="number"
-              defaultValue="0"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="border border-[#C49A8C] bg-[#F3EAE7] mt-2 rounded-lg text-center w-16"
-            />
-          </div>
-          {/* Horizontal line */}
-          <div
-            style={{
-              width: '2rem', // Adjust width based on your preference
-              height: '1px',
-              backgroundColor: 'black',
-              marginTop: '1.75rem', // Aligns with input fields
-            }}
-          />
-          <div className="flex flex-col items-start">
-            <label className="mr-2 text-sm">Up to</label>
-            <input
-              type="number"
-              defaultValue="600"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="border border-[#C49A8C] bg-[#F3EAE7] mt-2 rounded-lg text-center w-16"
-            />
-          </div>
-        </div>
-      </div>
+        {/* <div
+  className="absolute bg-[#F3EAE7] border border-[#C9ABA0] opacity-0 w-[79px] h-[28px] top-[1300px] left-[135px] rounded-tl-[5px] rounded-tr-none rounded-br-none rounded-bl-none"
+/> */}
+
+<div className="flex justify-center">
+  <div className="flex items-center space-x-1">
+    <div className="flex flex-col">
+      <label className="mr-2 text-sm">From</label>
+      <input
+        type="number"
+        defaultValue="0"
+        value={minPrice}
+        onChange={(e) => setMinPrice(e.target.value)}
+        className="border border-[#C49A8C] bg-[#F3EAE7] mt-2 rounded-lg text-center w-16"
+      />
+    </div>
+    {/* Horizontal line */}
+    <div
+      style={{
+        width: '2rem', // Adjust width as desired
+        height: '1px',
+        backgroundColor: 'black',
+        marginTop: '1.75rem', // Aligns with input fields
+      }}
+    />
+    <div className="flex flex-col items-start">
+      <label className="mr-2 text-sm left-[236px]">Up to</label>
+      <input
+        type="number"
+        defaultValue="600"
+        value={maxPrice}
+        onChange={(e) => setMaxPrice(e.target.value)}
+        className="border border-[#C49A8C] bg-[#F3EAE7] mt-2 rounded-lg text-center w-16"
+      />
+    </div>
+  </div>
+</div>
+</div>
+
 
       {/* Centered Filter Button */}
       <div className="flex justify-center">
-        <button onClick={handleFilter} className="px-8 text-sm bg-[#4D413E] text-white py-1 rounded-2xl hover:bg-gray-700">
+        <button onClick={handleFilter}className="w-[106px] h-[32px]  left-[170px] rounded-[30px] bg-[#4D413E] text-white px-8 text-sm py-1 ">
           Filter
         </button>
       </div>

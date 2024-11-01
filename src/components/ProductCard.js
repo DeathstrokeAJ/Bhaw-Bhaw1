@@ -36,9 +36,16 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       router.push('/Signin');
       return;
     }
-    const route = isRecommendation ? `/details/${product.id}` : `/productdetails/${product.id}`;
-    router.push(route);
+  
+    // Set product ID in localStorage
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem('selectedProductId', product.id);
+    }
+  
+    const route = isRecommendation ? '/details' : '/productdetails';
+    router.push(route); // Navigate without passing the ID in the URL
   };
+  
 
   const handleCartAction = async () => {
     if (!user) {
