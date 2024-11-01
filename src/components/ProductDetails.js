@@ -14,7 +14,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const productId = sessionStorage.getItem("productId");
+  const productId = router.query.id; // Assume productId is passed in the URL as a query parameter
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,9 +44,9 @@ const ProductDetails = () => {
     }
     try {
       await addToCart(product, quantity);
-      alert("Product added to cart successfully!");
+      setError("Product added to cart successfully!");
     } catch (error) {
-      alert("Error adding to cart: " + error.message);
+      setError("Error adding to cart: " + error.message);
       console.error("Error adding to cart:", error);
     }
   };
@@ -58,9 +58,9 @@ const ProductDetails = () => {
     }
     try {
       await addToWishlist(product);
-      alert("Product added to wishlist!");
+      setError("Product added to wishlist!");
     } catch (error) {
-      alert("Error adding to wishlist: " + error.message);
+      setError("Error adding to wishlist: " + error.message);
       console.error("Error adding to wishlist:", error);
     }
   };
@@ -78,7 +78,7 @@ const ProductDetails = () => {
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   if (loading) return <p>Loading product details...</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="p-10 font-poppins space-y-8">
