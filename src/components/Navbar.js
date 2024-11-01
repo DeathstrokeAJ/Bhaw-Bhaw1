@@ -1,9 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import { FiMenu } from "react-icons/fi";
+import { useAuth } from "../app/context/AuthContext"; // Update this import path as needed
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -11,10 +15,9 @@ const Navbar = () => {
 
   // Logout function
   const handleLogout = () => {
-    sessionStorage.removeItem("currentUser");
-    sessionStorage.removeItem("isLoggedIn");
+    logout();
     console.log("User logged out");
-    window.location.href = "/Signin";
+    router.push("/Signin");
   };
 
   return (
@@ -75,8 +78,6 @@ const Navbar = () => {
 
         {/* Icons and Buttons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {" "}
-          {/* Aligned right for all screen sizes */}
           <a href="/recommendation">
             <button>
               <img
@@ -95,37 +96,39 @@ const Navbar = () => {
               />
             </button>
           </a>
-          <button onClick={handleLogout}>
-            <img
-              src="/images/navbar/profile.png"
-              alt="Profile"
-              className="w-6 h-6 mb-2"
-            />
-          </button>
-          {/* Sign In and Login Buttons */}
-          <a href="/login">
-            <button className=" text-[#8E8E8E] px-3 py-1 rounded-md  ">
-              LOGIN
+          {user ? (
+            <button onClick={handleLogout}>
+              <img
+                src="/images/navbar/profile.png"
+                alt="Profile"
+                className="w-6 h-6 mb-2"
+              />
             </button>
-          </a>
-          <a href="/signin">
-  <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
-    <p>Sign up now</p>
-    <img
-      src="/images/navbar/image.png"
-      alt="Icon"
-      className="w-5 h-5 ml-2" // Added margin-left for spacing between text and icon
-    />
-  </button>
-
-          </a>
+          ) : (
+            <>
+              <a href="/login">
+                <button className="text-[#8E8E8E] px-3 py-1 rounded-md">
+                  LOGIN
+                </button>
+              </a>
+              <a href="/signin">
+                <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
+                  <p>Sign up now</p>
+                  <img
+                    src="/images/navbar/image.png"
+                    alt="Icon"
+                    className="w-5 h-5 ml-2"
+                  />
+                </button>
+              </a>
+            </>
+          )}
         </div>
 
         {/* Mobile Icon */}
         <div className="md:hidden flex items-center">
           <button onClick={toggleDrawer} className="focus:outline-none">
-            <FiMenu className="w-6 h-6 ml-4 text-gray-600 hover:text-black" />{" "}
-            {/* Menu icon */}
+            <FiMenu className="w-6 h-6 ml-4 text-gray-600 hover:text-black" />
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // Update the path if necessary
 import logo from "../../../public/images/signin/Group.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -10,15 +10,16 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 
 const SignInForm = () => {
   const router = useRouter();
-  const { user, setUser } = useAuth();
+  const { user, setUser  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  // Redirect if the user is already signed in
   useEffect(() => {
     if (user) {
       toast.success("Login successful");
-      router.push("/");
+      router.push("/"); // Redirect to home or desired page
     }
   }, [user, router]);
 
@@ -36,9 +37,9 @@ const SignInForm = () => {
         const userData = doc.data();
         if (userData.password === password) {
           userFound = true;
-          setUser(userData);
+          setUser ({ uid: doc.id, ...userData });
           toast.success("Login successful");
-          router.push("/");
+          router.push("/"); // Redirect to home or desired page
         }
       });
 
@@ -92,14 +93,12 @@ const SignInForm = () => {
             />
           </div>
         </div>
-        <div className="w-full flex justify-center lg:mt-10">
+        <div className="flex justify-between mb-6">
           <button
             type="submit"
-            className="w-full lg:w-fit lg:rounded-full bg-baw-red text-white font-bold py-3 px-7 rounded-md flex justify-center items-center hover:bg-baw-yellow"
-            disabled={loading}
+            className="bg-baw-orange hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-sm"
           >
-            <span>{loading ? "Signing In..." : "SIGN IN"}</span>
-            <span className="ml-2">➔</span>
+            Sign in
           </button>
         </div>
       </form>

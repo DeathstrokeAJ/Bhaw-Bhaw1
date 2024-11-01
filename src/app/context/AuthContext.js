@@ -1,39 +1,27 @@
 "use client"
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { db } from '../../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import React, { createContext, useContext, useState } from 'react';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser ] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const userId = sessionStorage.getItem('userId');
-        if (userId) {
-          const userDoc = await getDoc(doc(db, 'users', userId));
-          if (userDoc.exists()) {
-            setUser({ uid: userId, ...userDoc.data() });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const logout = () => {
+    setUser (null);
+  };
 
-    checkUser();
-  }, []);
+  const value = { 
+    user, 
+    setUser , 
+    loading, 
+    setLoading,
+    logout 
+  };
 
-  const value = { user, setUser, loading };
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : <div>Loading...</div>}
+      {children}
     </AuthContext.Provider>
   );
 };

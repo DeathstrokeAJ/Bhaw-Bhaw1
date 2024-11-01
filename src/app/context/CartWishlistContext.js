@@ -1,10 +1,18 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { db } from '../../../firebaseConfig';
-import { doc, setDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { AuthContext } from './AuthContext';
 
 export const CartWishlistContext = createContext();
+
+export const useCartWishlist = () => {
+  const context = useContext(CartWishlistContext);
+  if (!context) {
+    throw new Error('useCartWishlist must be used within a CartWishlistProvider');
+  }
+  return context;
+};
 
 export const CartWishlistProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -18,6 +26,14 @@ export const CartWishlistProvider = ({ children }) => {
     setCartItems(cartSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
+  // Add the missing fetchWishlistItems function
+  const fetchWishlistItems = async () => {
+    if (!user) return;
+    const wishlistRef = collection(db, 'users', user.uid, 'wishlist');
+    const wishlistSnapshot = await getDocs(wishlistRef);
+    setWishlistItems(wishlistSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
   const addToCart = async (product) => {
     if (!user) return;
     const cartRef = doc(db, 'users', user.uid, 'cart', product.id);
@@ -27,16 +43,11 @@ export const CartWishlistProvider = ({ children }) => {
 
   const removeFromCart = async (id) => {
     if (!user) return;
-    await setDoc(doc(db, 'users', user.uid, 'cart', id), null);
+    await deleteDoc(doc(db, 'users', user.uid, 'cart', id));
     await fetchCartItems();
   };
 
-  const fetchWishlistItems = async () => {
-    if (!user) return;
-    const wishlistRef = collection(db, 'users', user.uid, 'wishlist');
-    const wishlistSnapshot = await getDocs(wishlistRef);
-    setWishlistItems(wishlistSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  };
+  const isInCart = (id) => cartItems.some(item => item.id === id);
 
   const addToWishlist = async (product) => {
     if (!user) return;
@@ -45,17 +56,32 @@ export const CartWishlistProvider = ({ children }) => {
     await fetchWishlistItems();
   };
 
+  const removeFromWishlist = async (id) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'users', user.uid, 'wishlist', id));
+    await fetchWishlistItems();
+  };
+
+  const isInWishlist = (id) => wishlistItems.some(item => item.id === id);
+
   useEffect(() => {
-    fetchCartItems();
-    fetchWishlistItems();
+    if (user) {
+      fetchCartItems();
+      fetchWishlistItems();
+    }
   }, [user]);
 
   const value = {
     cartItems,
+    wishlistItems,
     addToCart,
     removeFromCart,
-    wishlistItems,
+    isInCart,
     addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    fetchCartItems,
+    fetchWishlistItems
   };
 
   return (
