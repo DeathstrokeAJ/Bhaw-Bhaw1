@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { db } from "../../../firebaseConfig"; 
 import { collection, query, where, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useAuth } from '../../app/context/AuthContext'; // Adjust the path as needed
-
+import Link from "next/link";
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [coupon, setCoupon] = useState("");
@@ -20,7 +20,7 @@ const Cart = () => {
     } else {
       sessionStorage.setItem('subtotal', subtotal);
       sessionStorage.setItem('total', total);
-      window.location.href = './checkout';
+      // window.location.href = './checkout';
     }
   };
 
@@ -172,55 +172,54 @@ const Cart = () => {
         </div>
   
         <div className="w-full lg:w-5/12 mb-10 bg-white h-full p-6 rounded-lg lg:mt-24 shadow-lg border border-gray-300">
-          <h2 className="text-lg md:text-xl font-semibold mb-3">Order Summary</h2>
-          <div className="mb-4">
-            <div className="flex justify-between">
-              <span className="text-[#676767] text-sm md:text-lg mb-2">Subtotal</span>
-              <span className="font-bold">INR {subtotal}</span>
-            </div>
-            <div className="flex justify-between text-[#E57A7A]">
-              <span className="text-[#676767] text-sm md:text-lg mb-2">Discount (-{couponDiscount}%)</span>
-              <span className="font-bold">-INR {discountAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#676767] text-sm md:text-lg mb-1">Delivery Fee</span>
-              <span className="font-bold">INR 15</span>
-            </div>
-          </div>
-          <hr className="border-t border-gray-300 my-4" />
-          <div className="flex justify-between mb-3">
-            <span className="text-lg md:text-xl font-semibold">Total</span>
-            <span className="font-bold">INR {total.toFixed(2)}</span>
-          </div>
-  
-          <div className="mt-4 flex flex-col sm:flex-row items-center">
-          <div className="flex items-center bg-[#F0F0F0] rounded-full flex-1 mb-2 sm:mb-0">
-          <img src="images/common/coupon.png" alt="Coupon Icon" className="w-5 h-5 sm:w-6 sm:h-6 mx-2" />
-            <input 
-              type="text" 
-              className="flex-1 p-2 bg-[#F0F0F0] rounded-full outline-none text-sm" 
-              placeholder="Coupon Code"
-              value={coupon}
-              onChange={(e) => setCoupon(e.target.value)}
-            />
-           
-            </div>
-            <button 
-              className="bg-[#E57A7A] text-white px-4 lg:mt-0 mt-2 sm:px-6 py-2 rounded-full ml-2" 
-              onClick={handleApplyCoupon}
-            >
-              Apply Coupon
-            </button>
-            {error && <p className="text-red-600 mt-2">{error}</p>}
-          </div>
-  
-          <button 
-            className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4" 
-            onClick={handleProceedToCheckout}
-          >
-            Proceed to Checkout
-          </button>
-        </div>
+  <h2 className="text-lg md:text-xl font-semibold mb-3">Order Summary</h2>
+  <div className="mb-4">
+    <div className="flex justify-between">
+      <span className="text-[#676767] text-sm md:text-lg mb-2">Subtotal</span>
+      <span className="font-bold">INR {subtotal}</span>
+    </div>
+    <div className="flex justify-between text-[#E57A7A]">
+      <span className="text-[#676767] text-sm md:text-lg mb-2">Discount (-{couponDiscount}%)</span>
+      <span className="font-bold">-INR {discountAmount.toFixed(2)}</span>
+    </div>
+    <div className="flex justify-between">
+      <span className="text-[#676767] text-sm md:text-lg mb-1">Delivery Fee</span>
+      <span className="font-bold">INR 15</span>
+    </div>
+  </div>
+  <hr className="border-t border-gray-300 my-4" />
+  <div className="flex justify-between mb-3">
+    <span className="text-lg md:text-xl font-semibold">Total</span>
+    <span className="font-bold">INR {total.toFixed(2)}</span>
+  </div>
+
+  <div className="mt-4 flex flex-col sm:flex-row items-center">
+    <div className="flex items-center bg-[#F0F0F0] rounded-full flex-1 mb-2 sm:mb-0">
+      <img src="images/common/coupon.png" alt="Coupon Icon" className="w-5 h-5 sm:w-6 sm:h-6 mx-2" />
+      <input 
+        type="text" 
+        className="flex-1 p-2 bg-[#F0F0F0] rounded-full outline-none text-sm" 
+        placeholder="Coupon Code"
+        value={coupon}
+        onChange={(e) => setCoupon(e.target.value)}
+      />
+    </div>
+    <button 
+      className="bg-[#E57A7A] text-white px-4 lg:mt-0 mt-2 sm:px-6 py-2 rounded-full ml-2" 
+      onClick={handleApplyCoupon}
+    >
+      Apply Coupon
+    </button>
+    {error && <p className="text-red-600 mt-2">{error}</p>}
+  </div>
+  <Link href="/checkout">
+  <button className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4" onClick={handleProceedToCheckout}>
+    <p>Proceed to Checkout</p>
+  </button>
+</Link>
+
+</div>
+
       </div>
 
       {isPopupVisible && (

@@ -1,10 +1,12 @@
 'use client';
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
-import { useAuth } from '../../app/context/AuthContext'; // Adjust the import path as necessary
+import { useAuth } from '../../app/context/AuthContext';
+import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 const CheckoutPage = () => {
-  const { user } = useAuth(); // Access user details from AuthContext
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -16,101 +18,158 @@ const CheckoutPage = () => {
     postalCode: "",
     checked: false,
   });
+  
   const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const { user } = useAuth();
   const db = getFirestore();
-  const userId = user ? user.uid : null; // Get user ID from context
 
+  // Redirect if no user
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSubtotal(Number(sessionStorage.getItem("subtotal")) || 0);
-      setTotal(Number(sessionStorage.getItem("total")) || 0);
+    if (!user) {
+      router.push('/signin');
     }
+  }, [user, router]);
 
+  // Fetch cart items and calculate totals
+  useEffect(() => {
     const fetchCartItems = async () => {
-      if (userId) {
-        const userDocRef = doc(db, "users", userId);
+      if (!user?.uid) return;
+
+      try {
+        setLoading(true);
+        const userDocRef = doc(db, "users", user.uid);
         const cartSnapshot = await getDocs(collection(userDocRef, "cart"));
-        setCartItems(cartSnapshot.docs.map((doc) => doc.data()));
+        const items = cartSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setCartItems(items);
+        
+        // Calculate totals
+        const itemSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        setSubtotal(itemSubtotal);
+        setTotal(itemSubtotal); // Add shipping cost if needed
+        
+        // Store in session
+        sessionStorage.setItem("subtotal", itemSubtotal.toString());
+        sessionStorage.setItem("total", itemSubtotal.toString());
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching cart:", err);
+        setError("Failed to load cart items");
+        setLoading(false);
       }
     };
 
     fetchCartItems();
-  }, [db, userId]);
+  }, [db, user]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
+    setFormData(prevData => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleContinueShipping = async (event) => {
-    event.preventDefault();
-    const { email, firstName, lastName, address, apartment, state, city, postalCode } = formData;
-
-    const generateShippingId = () => `SID${Date.now()}`;
-    const shippingId = generateShippingId();
-    const shippingData = {
-      email,
-      firstName,
-      lastName,
-      address,
-      apartment,
-      state,
-      city,
-      postalCode,
-    };
+  const handleContinueShipping = async (e) => {
+    e.preventDefault();
+    if (!user?.uid) {
+      setError("Please sign in to continue");
+      return;
+    }
 
     try {
-      await setDoc(doc(db, "shippingAddresses", shippingId), shippingData);
-      window.location.href = "/products";
-    } catch (error) {
-      console.error("Error adding document: ", error);
+      const shippingId = `${user.uid}_${Date.now()}`;
+      await setDoc(doc(db, "users", user.uid, "shipping", shippingId), {
+        ...formData,
+        createdAt: new Date().toISOString()
+      });
+      // Continue with checkout flow
+    } catch (err) {
+      console.error("Error saving shipping info:", err);
+      setError("Failed to save shipping information");
     }
   };
 
   const handleProceedToPayment = async () => {
-    await pushOrderDetails();
-    await clearCart();
-    setIsPopupVisible(true);
-  };
-
-  const pushOrderDetails = async () => {
-    const orderId = `OID${Date.now()}`;
-    const orderData = {
-      userId,
-      products: cartItems,
-    };
+    if (!user?.uid) {
+      setError("Please sign in to continue");
+      return;
+    }
 
     try {
-      await setDoc(doc(db, "orders", orderId), orderData);
-    } catch (error) {
-      console.error("Error adding order details: ", error);
+      // Create order
+      await pushOrderDetails();
+      // Clear cart
+      await clearCart();
+      // Show success popup
+      setIsPopupVisible(true);
+      // Reset totals
+      setSubtotal(0);
+      setTotal(0);
+      // Clear session storage
+      sessionStorage.removeItem("subtotal");
+      sessionStorage.removeItem("total");
+    } catch (err) {
+      console.error("Error processing payment:", err);
+      setError("Failed to process payment");
     }
   };
 
+  const pushOrderDetails = async () => {
+    const orderId = `${user.uid}_${Date.now()}`;
+    const orderData = {
+      userId: user.uid,
+      products: cartItems,
+      shippingDetails: formData,
+      totalAmount: total,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    await setDoc(doc(db, "orders", orderId), orderData);
+  };
+
   const clearCart = async () => {
-    const userDocRef = doc(db, "users", userId);
+    if (!user?.uid) return;
+    
+    const userDocRef = doc(db, "users", user.uid);
     const cartRef = collection(userDocRef, "cart");
+    
     const cartSnapshot = await getDocs(cartRef);
-    cartSnapshot.forEach((doc) => {
-      deleteDoc(doc.ref);
-    });
+    const deletePromises = cartSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
     setCartItems([]);
   };
 
   const closePopup = () => {
     setIsPopupVisible(false);
-    window.location.href = "/products"; // Redirect after closing the modal
+    router.push('/products'); // Redirect to products page after order
   };
 
-  // Extract the username from email, removing everything after '@'
-  const username = user?.username.split('@')[0];
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+
+  const username = user?.username.split('@')[0] || "User";
 
   return (
     <div className="font-poppins py-6 text-black bg-white">
@@ -120,7 +179,7 @@ const CheckoutPage = () => {
         }
       `}</style>
       <div className="bg-[#e4d5d0] py-8 lg:py-16 px-10 lg:px-36 mb-6">
-        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello {username || "User"}</h1>
+        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello {username}</h1>
       </div>
       <div className="flex flex-col lg:flex-row lg:justify-between mx-auto lg:mx-16 gap-6 lg:gap-0">
         <div className="w-full lg:w-8/12">
@@ -163,12 +222,14 @@ const CheckoutPage = () => {
                   onChange={handleChange}
                 />
               ))}
-              <button
-                className="bg-[#E57A7A] text-white mt-10 lg:mt-28 mb-10 px-6 py-3 rounded-md font-semibold w-full lg:w-auto"
-                onClick={handleContinueShipping}
-              >
-                Continue Shipping
-              </button>
+              <Link href="/products">
+                <button
+                  className="bg-[#E57A7A] text-white mt-10 lg:mt-28 mb-10 px-6 py-3 rounded-md font-semibold w-full lg:w-auto"
+                  onClick={handleContinueShipping}
+                >
+                  Continue Shipping
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -194,15 +255,19 @@ const CheckoutPage = () => {
           <div className="border-t bg-[#f4f4fc] p-7 pt-4">
             <div className="flex justify-between mb-2">
               <span className="text-[#6e6e6e]">Subtotal</span>
-              <span className="font-semibold">INR {subtotal.toFixed(2)}</span>
+              <span className="font-semibold text-black">INR {subtotal}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span className="text-[#6e6e6e]">Shipping</span>
+              <span className="font-semibold text-black">Free</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-[#6e6e6e]">Total</span>
-              <span className="font-semibold">INR {total.toFixed(2)}</span>
+              <span className="font-semibold text-black">INR {total}</span>
             </div>
             <button
+              className="bg-[#E57A7A] text-white mt-10 mb-6 w-full py-3 rounded-md font-semibold"
               onClick={handleProceedToPayment}
-              className="bg-[#E57A7A] text-white mt-6 mb-10 px-6 py-3 rounded-md font-semibold w-full"
             >
               Proceed to Payment
             </button>
@@ -210,11 +275,14 @@ const CheckoutPage = () => {
         </div>
       </div>
       {isPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-lg font-bold mb-4">Order Placed Successfully!</h2>
-            <p className="mb-4">Thank you for your order. We will process it shortly.</p>
-            <button onClick={closePopup} className="bg-[#E57A7A] text-white px-4 py-2 rounded">
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white rounded-lg p-6">
+            <h3 className="text-lg font-bold mb-4">Order Placed!</h3>
+            <p>Your order has been successfully placed. Thank you!</p>
+            <button
+              className="mt-4 bg-[#E57A7A] text-white px-4 py-2 rounded"
+              onClick={closePopup}
+            >
               Close
             </button>
           </div>
