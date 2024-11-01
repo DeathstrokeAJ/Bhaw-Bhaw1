@@ -19,7 +19,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userId = sessionStorage.getItem('userId'); // Get userId from session storage
+      const userId = sessionStorage.getItem('userId');
+
       if (userId) {
         try {
           const userRef = doc(db, 'users', userId);
@@ -27,16 +28,16 @@ export const AuthProvider = ({ children }) => {
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() });
           } else {
-            setUser(null); // Reset user if not found
-            sessionStorage.removeItem('userId'); // Clear session storage if user not found
+            setUser(null);
+            sessionStorage.removeItem('userId');
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          setUser(null); // Reset user in case of error
-          sessionStorage.removeItem('userId'); // Clear session storage on error
+          setUser(null);
+          sessionStorage.removeItem('userId');
         }
       } else {
-        setUser(null); // No userId found, reset user state
+        setUser(null);
       }
       setLoading(false);
     };
@@ -45,15 +46,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('userId'); // Clear userId on logout
-    setUser(null); // Reset user state
+    sessionStorage.removeItem('userId');
+    setUser(null);
   };
 
   const value = {
     user,
-    setUser, // This allows components to set the user
+    setUser,
     loading,
-    handleLogout, // Providing a logout handler
+    handleLogout,
   };
 
   return (

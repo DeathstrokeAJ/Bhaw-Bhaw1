@@ -13,8 +13,8 @@ const ProductCard = ({ product, isRecommendation = false }) => {
   const { addToCart, removeFromCart, addToWishlist, removeFromWishlist } = useCartWishlist();
   const [isProductInCart, setIsProductInCart] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state for actions
-
+  const [loading, setLoading] = useState(false);
+    
   useEffect(() => {
     const checkProductStatus = async () => {
       if (user && product) {
@@ -35,7 +35,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
   const handleBuyNow = () => {
     if (!user) {
       toast.error("Please sign in to continue");
-      router.push('/Signin');
+      router.push('/signin');
       return;
     }
     const route = isRecommendation ? `/details/${product.id}` : `/productdetails/${product.id}`;

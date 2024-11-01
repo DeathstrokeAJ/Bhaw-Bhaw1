@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import { FiMenu } from "react-icons/fi";
 import { useAuth } from "../app/context/AuthContext"; // Update this import path as needed
 import { useRouter } from "next/navigation";
@@ -35,50 +36,35 @@ const Navbar = () => {
         {/* Navigation Links */}
         <ul className="hidden md:flex flex-grow justify-center lg:space-x-8 text-gray-600">
           <li>
-            <a
-              href="/about"
-              className="hover:text-black text-[#C4B0A9] cursor-pointer"
-            >
+            <Link href="/about" className="hover:text-black text-[#C4B0A9] cursor-pointer">
               About us
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/products"
-              className="hover:text-black text-[#C4B0A9] cursor-pointer"
-            >
+            <Link href="/products" className="hover:text-black text-[#C4B0A9] cursor-pointer">
               Products
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/service"
-              className="hover:text-black text-[#C4B0A9] cursor-pointer"
-            >
+            <Link href="/service" className="hover:text-black text-[#C4B0A9] cursor-pointer">
               Services
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/blogs"
-              className="hover:text-black text-[#C4B0A9] font-medium cursor-pointer"
-            >
+            <Link href="/blogs" className="hover:text-black text-[#C4B0A9] font-medium cursor-pointer">
               Blogs
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/contact"
-              className="hover:text-black text-[#C4B0A9] cursor-pointer"
-            >
+            <Link href="/contact" className="hover:text-black text-[#C4B0A9] cursor-pointer">
               Contact us
-            </a>
+            </Link>
           </li>
         </ul>
 
         {/* Icons and Buttons */}
         <div className="flex items-center space-x-4 ml-auto">
-          <a href="/recommendation">
+          <Link href="/recommendation">
             <button>
               <img
                 src="/images/navbar/heart.png"
@@ -86,8 +72,8 @@ const Navbar = () => {
                 className="w-6 h-6"
               />
             </button>
-          </a>
-          <a href="/cart">
+          </Link>
+          <Link href="/cart">
             <button>
               <img
                 src="/images/navbar/cart.png"
@@ -95,7 +81,7 @@ const Navbar = () => {
                 className="w-6 h-6"
               />
             </button>
-          </a>
+          </Link>
           {user ? (
             <button onClick={handleLogout}>
               <img
@@ -106,12 +92,12 @@ const Navbar = () => {
             </button>
           ) : (
             <>
-              <a href="/login">
+              <Link href="/login">
                 <button className="text-[#8E8E8E] px-3 py-1 rounded-md">
                   LOGIN
                 </button>
-              </a>
-              <a href="/signin">
+              </Link>
+              <Link href="/signin">
                 <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
                   <p>Sign up now</p>
                   <img
@@ -120,7 +106,7 @@ const Navbar = () => {
                     className="w-5 h-5 ml-2"
                   />
                 </button>
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -138,44 +124,29 @@ const Navbar = () => {
         <div className="absolute top-16 left-0 w-full bg-white shadow-lg z-10">
           <ul className="flex flex-col items-center text-gray-600 p-4">
             <li>
-              <a
-                href="/about"
-                className="hover:text-black text-[#C4B0A9] cursor-pointer py-2"
-              >
+              <Link href="/about" className="hover:text-black text-[#C4B0A9] cursor-pointer py-2">
                 About us
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/products"
-                className="hover:text-black text-[#C4B0A9] cursor-pointer py-2"
-              >
+              <Link href="/products" className="hover:text-black text-[#C4B0A9] cursor-pointer py-2">
                 Products
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/service"
-                className="hover:text-black text-[#C4B0A9] cursor-pointer py-2"
-              >
+              <Link href="/service" className="hover:text-black text-[#C4B0A9] cursor-pointer py-2">
                 Services
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/blogs"
-                className="hover:text-black text-[#C4B0A9] font-medium cursor-pointer py-2"
-              >
+              <Link href="/blogs" className="hover:text-black text-[#C4B0A9] font-medium cursor-pointer py-2">
                 Blogs
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/contact"
-                className="hover:text-black text-[#C4B0A9] cursor-pointer py-2"
-              >
+              <Link href="/contact" className="hover:text-black text-[#C4B0A9] cursor-pointer py-2">
                 Contact us
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
