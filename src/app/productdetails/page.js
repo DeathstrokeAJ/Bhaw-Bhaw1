@@ -6,8 +6,8 @@ import { AiFillHeart, AiFillStar, AiOutlineHeart } from "react-icons/ai";
 import { db } from '../../../firebaseConfig';
 import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../../context/AuthContext'; // Import AuthContext
-import { CartWishlistContext } from '../../context/CartWishlistContext'; // Import CartWishlistContext
+// import { AuthContext } from '../../context/AuthContext'; // Import AuthContext
+// import { CartWishlistContext } from '../../context/CartWishlistContext'; // Import CartWishlistContext
 
 const ProductDetail = () => {
   // const router = useRouter();
