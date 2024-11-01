@@ -12,21 +12,21 @@
 //   const productId = `PID${Math.floor(Date.now() / 1000)}${Math.floor(Math.random() * 1000)}`;
 
 //   return {
-//     category: category.category,
-//     subCategory: category.subCategory,
-//     title: `${category.name} Product ${i + 1}`,
-//     description: `Description for ${category.name} product ${i + 1}.`,
-//     price: Math.floor(Math.random() * (700 - 60 + 1)) + 60,
-//     images: [
-//       "https://firebasestorage.googleapis.com/v0/b/d-bhaw-bhaw.appspot.com/o/bigproduct.png?alt=media&token=faab87bb-8703-4288-995c-abac5e326c24"
-//     ],
-//     createdAt: serverTimestamp(),
-//     updatedAt: serverTimestamp(),
-//     status: "approved",
-//     productId: productId,
-//     vendorId: `UID${category.index}`,
-//     vendorUID: `UID${category.index}`,
-//     warranty: "yes"
+    // category: category.category,
+    // subCategory: category.subCategory,
+    // title: `${category.name} Product ${i + 1}`,
+    // description: `Description for ${category.name} product ${i + 1}.`,
+    // price: Math.floor(Math.random() * (700 - 60 + 1)) + 60,
+    // images: [
+    //   "https://firebasestorage.googleapis.com/v0/b/d-bhaw-bhaw.appspot.com/o/bigproduct.png?alt=media&token=faab87bb-8703-4288-995c-abac5e326c24"
+    // ],
+    // createdAt: serverTimestamp(),
+    // updatedAt: serverTimestamp(),
+    // status: "approved",
+    // productId: productId,
+    // vendorId: `UID${category.index}`,
+    // vendorUID: `UID${category.index}`,
+    // warranty: "yes"
 //   };
 // }
 
