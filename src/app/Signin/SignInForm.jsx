@@ -1,7 +1,6 @@
-// pages/signin/SignInForm.js
 "use client";
-import React, { useEffect, useState, useContext } from "react";
-import { useAuth } from "../context/AuthContext"; // Ensure the correct import path
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import logo from "../../../public/images/signin/Group.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -11,13 +10,13 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 
 const SignInForm = () => {
   const router = useRouter();
-  const { user, setUser } = useAuth(); // Use the useAuth hook to get user and setUser
+  const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (user) { // Redirect if user is already authenticated
+    if (user) {
       toast.success("Login successful");
       router.push("/");
     }
@@ -37,7 +36,7 @@ const SignInForm = () => {
         const userData = doc.data();
         if (userData.password === password) {
           userFound = true;
-          setUser(userData); // Set user in context instead of sessionStorage
+          setUser(userData);
           toast.success("Login successful");
           router.push("/");
         }
@@ -48,6 +47,7 @@ const SignInForm = () => {
       }
     } catch (error) {
       console.error("Error in login", error);
+      toast.error("An error occurred during login");
     } finally {
       setLoading(false);
     }

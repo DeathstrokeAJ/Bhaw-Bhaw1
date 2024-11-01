@@ -1,4 +1,3 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../../../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -11,27 +10,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      // Example: Fetch user data here if needed
-      const userId = sessionStorage.getItem('userId'); // Or any other logic
-      if (userId) {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        setUser({ uid: userId, ...userDoc.data() });
+      try {
+        const userId = sessionStorage.getItem('userId');
+        if (userId) {
+          const userDoc = await getDoc(doc(db, 'users', userId));
+          if (userDoc.exists()) {
+            setUser({ uid: userId, ...userDoc.data() });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkUser();
   }, []);
 
-  const value = {
-    user,
-    setUser,
-    loading
-  };
-
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, setUser, loading }}>
+      {!loading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 };
@@ -39,7 +38,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
