@@ -1,8 +1,10 @@
-'use client'
-import React, { useEffect, useState } from "react";
+'use client';
+import React, { useEffect, useState, useContext } from "react";
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
+import { useAuth } from '../../app/context/AuthContext'; // Adjust the import path as necessary
 
 const CheckoutPage = () => {
+  const { user } = useAuth(); // Access user details from AuthContext
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -20,7 +22,7 @@ const CheckoutPage = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const db = getFirestore();
-  const userId = typeof window !== "undefined" ? sessionStorage.getItem("userId") : null;
+  const userId = user ? user.uid : null; // Get user ID from context
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -107,6 +109,8 @@ const CheckoutPage = () => {
     window.location.href = "/products"; // Redirect after closing the modal
   };
 
+  // Extract the username from email, removing everything after '@'
+  const username = user?.username.split('@')[0];
 
   return (
     <div className="font-poppins py-6 text-black bg-white">
@@ -116,7 +120,7 @@ const CheckoutPage = () => {
         }
       `}</style>
       <div className="bg-[#e4d5d0] py-8 lg:py-16 px-10 lg:px-36 mb-6">
-        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello Ujjawal Tyagi</h1>
+        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello {username || "User"}</h1>
       </div>
       <div className="flex flex-col lg:flex-row lg:justify-between mx-auto lg:mx-16 gap-6 lg:gap-0">
         <div className="w-full lg:w-8/12">
@@ -189,36 +193,28 @@ const CheckoutPage = () => {
           </div>
           <div className="border-t bg-[#f4f4fc] p-7 pt-4">
             <div className="flex justify-between mb-2">
-              <span className="text-lg lg:text-xl font-medium">Subtotals:</span>
-              <span className="text-lg lg:text-xl font-medium">INR {subtotal}</span>
+              <span className="text-[#6e6e6e]">Subtotal</span>
+              <span className="font-semibold">INR {subtotal.toFixed(2)}</span>
             </div>
-            <hr className="my-1 border-gray-300 mb-8 mx-2" />
-            <div className="flex justify-between">
-              <span className="text-lg lg:text-xl font-medium">Totals:</span>
-              <span className="text-lg lg:text-xl font-medium">INR {total}</span>
+            <div className="flex justify-between mb-2">
+              <span className="text-[#6e6e6e]">Total</span>
+              <span className="font-semibold">INR {total.toFixed(2)}</span>
             </div>
             <button
               onClick={handleProceedToPayment}
-              className="bg-[#E57A7A] text-white mt-8 px-6 py-3 rounded-md font-semibold w-full"
+              className="bg-[#E57A7A] text-white mt-6 mb-10 px-6 py-3 rounded-md font-semibold w-full"
             >
-              Proceed To Payment
+              Proceed to Payment
             </button>
           </div>
         </div>
       </div>
       {isPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-md">
-          <div className="flex flex-col mx-32 my-3 items-center">
-              <img
-                src="/images/services/popup.png"
-                alt="Success Icon"
-                className="h-32 w-32 mb-6"
-              />
-              <h2 className="text-xl font-bold text-center">Thank you for your order!</h2>
-              <p className="text-gray-600 text-center">Your order has been received and is being processed.</p>
-            </div>
-            <button className="bg-[#E57A7A] text-white px-6 py-3 rounded-md font-semibold mt-4 w-full" onClick={closePopup}>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-lg font-bold mb-4">Order Placed Successfully!</h2>
+            <p className="mb-4">Thank you for your order. We will process it shortly.</p>
+            <button onClick={closePopup} className="bg-[#E57A7A] text-white px-4 py-2 rounded">
               Close
             </button>
           </div>

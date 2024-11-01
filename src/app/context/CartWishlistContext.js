@@ -1,65 +1,72 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
-import { db } from "../../../firebaseConfig"; // Ensure your Firebase config is correct
-import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions if needed
-import { useAuth } from "../../app/context/AuthContext"; // Import AuthContext to access user information
+import { db } from "../../../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { useAuth } from "../../app/context/AuthContext";
 
-export const CartWishlistContext = createContext(); // Ensure this is exported
+export const CartWishlistContext = createContext();
 
 export const CartWishlistProvider = ({ children }) => {
-  const { user } = useAuth(); // Access user from AuthContext
+  const { user } = useAuth();
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState(null); // New state for selected product ID
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   const addToCart = async (product) => {
-    if (!user) return; // Ensure user is logged in
-    // Add product to cart state
-    setCart((prevCart) => [...prevCart, product]);
-    const docRef = doc(db, "users", user.uid, "cart", product.id);
-    await setDoc(docRef, product); // Save product in Firestore under user's cart
+    if (!user) return;
+    const newCart = [...cart, product];
+    setCart(newCart);
+    await setDoc(doc(db, "users", user.uid, "cart", product.id), product);
   };
-
-  const removeFromCart = async (productId) => {
-    if (!user) return; // Ensure user is logged in
-    // Remove product from cart state
-    setCart((prevCart) => prevCart.filter(item => item.id !== productId));
-    const docRef = doc(db, "users", user.uid, "cart", productId);
-    await setDoc(docRef, { deleted: true }); // Mark as deleted or remove from Firestore
-  };
-
   const addToWishlist = async (product) => {
-    if (!user) return; // Ensure user is logged in
-    // Add product to wishlist state
+    if (!user) return;
     setWishlist((prevWishlist) => [...prevWishlist, product]);
     const docRef = doc(db, "users", user.uid, "wishlist", product.id);
-    await setDoc(docRef, product); // Save product in Firestore under user's wishlist
+    await setDoc(docRef, product);
   };
 
   const removeFromWishlist = async (productId) => {
-    if (!user) return; // Ensure user is logged in
-    // Remove product from wishlist state
-    setWishlist((prevWishlist) => prevWishlist.filter(item => item.id !== productId));
+    if (!user) return;
+    setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== productId));
     const docRef = doc(db, "users", user.uid, "wishlist", productId);
-    await setDoc(docRef, { deleted: true }); // Mark as deleted or remove from Firestore
+    await setDoc(docRef, { deleted: true });
+  };
+  const removeFromCart = async (productId) => {
+    if (!user) return;
+    const updatedCart = cart.filter((item) => item.id !== productId);
+    setCart(updatedCart);
+    await setDoc(doc(db, "users", user.uid, "cart", productId), { deleted: true });
+  };
+
+  const updateCartItemQuantity = async (productId, newQuantity) => {
+    if (!user) return;
+    const updatedCart = cart.map((item) =>
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    );
+    setCart(updatedCart);
+    await setDoc(doc(db, "users", user.uid, "cart", productId), { quantity: newQuantity }, { merge: true });
   };
 
   return (
-    <CartWishlistContext.Provider value={{
-      cart,
-      wishlist,
-      addToCart,
-      removeFromCart,
-      addToWishlist,
-      removeFromWishlist,
-      selectedProductId, // Expose selected product ID
-      setSelectedProductId, // Function to set selected product ID
-    }}>
+    <CartWishlistContext.Provider
+      value={{
+        cart,
+        wishlist,
+        addToCart,
+        removeFromCart,
+        addToWishlist,
+        removeFromWishlist,
+        updateCartItemQuantity,
+        selectedProductId,
+        setSelectedProductId,
+      }}
+    >
       {children}
     </CartWishlistContext.Provider>
   );
 };
 
+
 export const useCartWishlist = () => {
-  return useContext(CartWishlistContext); // Make sure this is exported
+  return useContext(CartWishlistContext);
 };

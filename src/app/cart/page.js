@@ -1,83 +1,95 @@
 'use client';
 import React, { useState, useEffect } from "react";
-import { useCartWishlist } from "../../app/context/CartWishlistContext"; 
-import { useAuth } from "../../app/context/AuthContext"; 
 import { db } from "../../../firebaseConfig"; 
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { useAuth } from '../../app/context/AuthContext'; // Adjust the path as needed
 
 const Cart = () => {
-  const { cart, removeFromCart, updateCartItemQuantity } = useCartWishlist(); // Use context for cart management
+  const [cartItems, setCartItems] = useState([]);
   const [coupon, setCoupon] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [error, setError] = useState("");
-  const { user } = useAuth();
-  const userId = user ? user.id : null; 
+  const { user } = useAuth(); // Get user from AuthContext
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
-  const closePopup = () => {
-    setIsPopupVisible(false);
-  };
+  const [isPopupVisible1, setIsPopupVisible1] = useState(false);
+  const [isPopupVisible2, setIsPopupVisible2] = useState(false);
 
   const handleProceedToCheckout = () => {
-    if (cart.length === 0) {
+    if (cartItems.length === 0) {
       setIsPopupVisible(true);
     } else {
-      const subtotal = calculateSubtotal(cart);
       sessionStorage.setItem('subtotal', subtotal);
+      sessionStorage.setItem('total', total);
       window.location.href = './checkout';
     }
   };
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      if (!userId) return; 
-      
-      const cartRef = collection(db, "users", userId, "cart");
+      if (!user || !user.uid) {
+        console.error("User ID is not available.");
+        return;
+      }
+
+      const cartRef = collection(db, "users", user.uid, "cart");
       const cartSnapshot = await getDocs(cartRef);
 
       let fetchedItems = [];
-      for (const doc of cartSnapshot.docs) {
+      cartSnapshot.forEach((doc) => {
         const productData = doc.data();
-        const productRef = doc(db, "products", productData.productId); 
-        const productDoc = await getDocs(productRef);
+        const existingProductIndex = fetchedItems.findIndex(item => item.id === productData.id);
+        
+        const itemWithFallbacks = {
+          id: productData.id || doc.id,
+          title: productData.title || "Sample Product",
+          size: productData.size || "M",
+          color: productData.color || "Red",
+          price: productData.price || 100,
+          quantity: 1,
+        };
 
-        if (productDoc.exists()) {
-          const product = productDoc.data();
-          const itemWithFallbacks = {
-            id: productData.id || doc.id,
-            title: product.title || "Sample Product",
-            size: productData.size || "M",
-            color: productData.color || "Red",
-            price: product.price || 100,
-            quantity: productData.quantity || 1 , 
-          };
-
+        if (existingProductIndex > -1) {
+          fetchedItems[existingProductIndex].quantity += 1;
+        } else {
           fetchedItems.push(itemWithFallbacks);
         }
-      }
-
-      // Update cart state
-      fetchedItems.forEach(item => {
-        const existingItem = cart.find(cartItem => cartItem.id === item.id);
-        if (existingItem) {
-          existingItem.quantity += item.quantity; 
-        } else {
-          cart.push(item); 
-        }
       });
+
+      setCartItems(fetchedItems);
     };
 
     fetchCartItems();
-  }, [userId, cart]);
+  }, [user]);
 
-  const calculateSubtotal = (cartItems) => {
-    return cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "cart", id));
+      setCartItems(cartItems.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting item from cart:", error);
+    }
   };
 
-  const calculateTotal = (subtotal) => {
-    const discountAmount = (subtotal * (couponDiscount / 100));
-    return (subtotal - discountAmount + 15) || 0; // Include delivery fee
+  const handleQuantityChange = async (id, change) => {
+    const itemIndex = cartItems.findIndex(item => item.id === id);
+    const newQuantity = cartItems[itemIndex].quantity + change;
+
+    if (newQuantity < 1) return;
+
+    const updatedItems = [...cartItems];
+    updatedItems[itemIndex].quantity = newQuantity;
+    setCartItems(updatedItems);
+
+    try {
+      await updateDoc(doc(db, "users", user.uid, "cart", id), { quantity: newQuantity });
+    } catch (error) {
+      console.error("Error updating item quantity:", error);
+    }
   };
+
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const discountAmount = (subtotal * (couponDiscount / 100));
+  const total = subtotal - discountAmount + 15;
 
   const handleApplyCoupon = async () => {
     try {
@@ -86,45 +98,42 @@ const Cart = () => {
       const couponSnapshot = await getDocs(q);
 
       if (couponSnapshot.empty) {
-        setError("Invalid coupon");
+        setIsPopupVisible1(true);
         setCouponDiscount(0);
         return;
       }
 
       const couponData = couponSnapshot.docs[0].data();
-      const minPrice = couponData.minPrice || 0; // Assuming minPrice is in the coupon document
-      const subtotal = calculateSubtotal(cart);
 
-      if (minPrice > subtotal) {
-        setError(`Minimum subtotal of INR ${minPrice} required for this coupon.`);
-        setCouponDiscount(0);
+      // Check if subtotal is greater than or equal to minPrice
+      if (subtotal < couponData.minPrice) {
+        setIsPopupVisible2(true);
         return;
       }
 
       setCouponDiscount(couponData.discount);
-      setError("");
 
-      // Update timesUsed field in the coupon document
-      const couponDocRef = doc(db, "coupons", couponSnapshot.docs[0].id);
-      await updateDoc(couponDocRef, {
-        timesUsed: couponData.timesUsed + 1 // Increment times used
+      // Update timesUsed field
+      await updateDoc(doc(db, "coupons", couponSnapshot.docs[0].id), {
+        timesUsed: (couponData.timesUsed || 0) + 1
       });
+
+      setError("");
     } catch (error) {
       console.error("Error applying coupon:", error);
     }
   };
 
-  const handleQuantityChange = async (id, change) => {
-    const updatedCart = cart.map(item => {
-      if (item.id === id) {
-        const newQuantity = item.quantity + change;
-        return { ...item, quantity: Math.max(newQuantity, 1) }; // Ensure quantity doesn't go below 1
-      }
-      return item;
-    });
+  const closePopup = () => {
+    setIsPopupVisible(false);
+  };
 
-    // Update cart state and Firestore
-    await updateCartItemQuantity(updatedCart);
+  const closePopup1 = () => {
+    setIsPopupVisible1(false);
+  };
+  
+  const closePopup2 = () => {
+    setIsPopupVisible2(false);
   };
 
   return (
@@ -139,7 +148,7 @@ const Cart = () => {
         <div className="w-full lg:w-8/12 p-4 md:p-6 lg:p-10">
           <h2 className="text-2xl md:text-3xl font-semibold mb-4">Your cart</h2>
   
-          {cart.map((item) => (
+          {cartItems.map((item) => (
             <div key={item.id} className="border border-gray-300 bg-white p-4 rounded-lg flex items-center justify-between mb-4 flex-col sm:flex-row">
               <div className="flex items-center mb-4 sm:mb-0">
                 <img src="images/common/product.png" alt={item.title} className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-lg bg-[#f0eeed]" />
@@ -151,7 +160,7 @@ const Cart = () => {
                 </div>
               </div>
               <div className="flex lg:flex-col sm:flex-row-reverse items-center lg:items-end w-full lg:w-auto justify-between">
-                <img src="images/common/dustbin.png" alt="Delete" className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer lg:mt-2 ml-4 sm:ml-0" onClick ={() => removeFromCart(item.id)} />
+                <img src="images/common/dustbin.png" alt="Delete" className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer lg:mt-2 ml-4 sm:ml-0" onClick={() => handleDelete(item.id)} />
                 <div className="flex items-center mt-12 bg-[#F0F0F0] px-2 py-1 rounded-2xl">
                   <button className="px-2" onClick={() => handleQuantityChange(item.id, -1)}>-</button>
                   <span className="mx-2">{item.quantity}</span>
@@ -167,48 +176,79 @@ const Cart = () => {
           <div className="mb-4">
             <div className="flex justify-between">
               <span className="text-[#676767] text-sm md:text-lg mb-2">Subtotal</span>
-              <span className="font-bold">INR {calculateSubtotal(cart).toFixed(2)}</span>
+              <span className="font-bold">INR {subtotal}</span>
             </div>
             <div className="flex justify-between text-[#E57A7A]">
               <span className="text-[#676767] text-sm md:text-lg mb-2">Discount (-{couponDiscount}%)</span>
-              <span className="font-bold">-INR {(calculateSubtotal(cart) * (couponDiscount / 100)).toFixed(2)}</span>
+              <span className="font-bold">-INR {discountAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#676767] text-sm md:text-lg mb-1">Delivery Fee</span>
               <span className="font-bold">INR 15</span>
             </div>
           </div>
-          <hr className="mb-4" />
-          <div className="flex justify-between text-lg md:text-xl">
-            <span>Total</span>
-            <span className="font-bold">INR {calculateTotal(calculateSubtotal(cart)).toFixed(2)}</span>
+          <hr className="border-t border-gray-300 my-4" />
+          <div className="flex justify-between mb-3">
+            <span className="text-lg md:text-xl font-semibold">Total</span>
+            <span className="font-bold">INR {total.toFixed(2)}</span>
           </div>
   
           <div className="mt-4 flex flex-col sm:flex-row items-center">
-            <div className="flex items-center border border-gray-300 p-2 rounded-full w-full md:w-3/4">
-              <input 
-                type="text"
-                placeholder="Enter coupon code"
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value)}
-                className="flex-1 px-3 py-2 bg-[#F0F0F0] border-none focus:outline-none" 
-              />
-              <button className="bg-[#E57A7A] text-white rounded-full px-4 py-2" onClick={handleApplyCoupon}>Apply</button>
+          <div className="flex items-center bg-[#F0F0F0] rounded-full flex-1 mb-2 sm:mb-0">
+          <img src="images/common/coupon.png" alt="Coupon Icon" className="w-5 h-5 sm:w-6 sm:h-6 mx-2" />
+            <input 
+              type="text" 
+              className="flex-1 p-2 bg-[#F0F0F0] rounded-full outline-none text-sm" 
+              placeholder="Coupon Code"
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value)}
+            />
+           
             </div>
-            {error && <span className="text-red-500 text-xs mt-2">{error}</span>}
+            <button 
+              className="bg-[#E57A7A] text-white px-4 lg:mt-0 mt-2 sm:px-6 py-2 rounded-full ml-2" 
+              onClick={handleApplyCoupon}
+            >
+              Apply Coupon
+            </button>
+            {error && <p className="text-red-600 mt-2">{error}</p>}
           </div>
   
-          <button className="bg-[#E57A7A] text-white rounded-full py-2 px-4 mt-4" onClick={handleProceedToCheckout}>
+          <button 
+            className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4" 
+            onClick={handleProceedToCheckout}
+          >
             Proceed to Checkout
           </button>
         </div>
       </div>
-  
+
       {isPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold">Cart is empty!</h3>
-            <button onClick={closePopup} className="mt-4 bg-[#E57A7A] text-white px-4 py-2 rounded">Close</button>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold">Your cart is empty!</h3>
+            <p>Please add items to your cart before proceeding.</p>
+            <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {isPopupVisible1 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold">Invalid Coupon!</h3>
+            <p>The coupon code you entered is not valid.</p>
+            <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup1}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {isPopupVisible2 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold">Minimum Subtotal Not Attained!</h3>
+            <p>To apply this coupon, your subtotal must be a bit higher.</p>
+            <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup2}>Close</button>
           </div>
         </div>
       )}

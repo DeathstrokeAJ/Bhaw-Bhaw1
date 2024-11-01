@@ -93,12 +93,14 @@ const SignInForm = () => {
             />
           </div>
         </div>
-        <div className="flex justify-between mb-6">
+        <div className="w-full flex justify-center lg:mt-10">
           <button
             type="submit"
-            className="bg-baw-orange hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-sm"
+            className="w-full lg:w-fit lg:rounded-full bg-baw-red text-white font-bold py-3 px-7 rounded-md flex justify-center items-center hover:bg-baw-yellow"
+            disabled={loading}
           >
-            Sign in
+            <span>{loading ? "Signing In..." : "SIGN IN"}</span>
+            <span className="ml-2">➔</span>
           </button>
         </div>
       </form>

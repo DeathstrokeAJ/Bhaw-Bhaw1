@@ -1,20 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../app/context/AuthContext";
-import { useCartWishlist } from "../app/context/CartWishlistContext";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import toast from 'react-hot-toast'; // Optional: for better notifications
 
 const ProductCard = ({ product, isRecommendation = false }) => {
   const router = useRouter();
   const { user } = useAuth();
-  const { addToCart, removeFromCart, addToWishlist, removeFromWishlist } = useCartWishlist();
   const [isProductInCart, setIsProductInCart] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(false);
-    
+
   useEffect(() => {
     const checkProductStatus = async () => {
       if (user && product) {
@@ -35,7 +33,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
   const handleBuyNow = () => {
     if (!user) {
       toast.error("Please sign in to continue");
-      router.push('/signin');
+      router.push('/Signin');
       return;
     }
     const route = isRecommendation ? `/details/${product.id}` : `/productdetails/${product.id}`;
@@ -51,15 +49,13 @@ const ProductCard = ({ product, isRecommendation = false }) => {
 
     setLoading(true); // Start loading
     try {
+      const cartDocRef = doc(db, "users", user.uid, "cart", product.id);
       if (isProductInCart) {
-        await removeFromCart(product.id);
+        await setDoc(cartDocRef, {}, { merge: true }); // Removing by merging with empty object
         setIsProductInCart(false);
         toast.success("Product removed from cart");
       } else {
-        await addToCart({
-          ...product,
-          addedAt: serverTimestamp(),
-        });
+        await setDoc(cartDocRef, { ...product, addedAt: serverTimestamp() });
         setIsProductInCart(true);
         toast.success("Product added to cart");
       }
@@ -80,15 +76,13 @@ const ProductCard = ({ product, isRecommendation = false }) => {
 
     setLoading(true); // Start loading
     try {
+      const wishlistDocRef = doc(db, "users", user.uid, "wishlist", product.id);
       if (isInWishlist) {
-        await removeFromWishlist(product.id);
+        await setDoc(wishlistDocRef, {}, { merge: true }); // Removing by merging with empty object
         setIsInWishlist(false);
         toast.success("Product removed from wishlist");
       } else {
-        await addToWishlist({
-          ...product,
-          addedAt: serverTimestamp(),
-        });
+        await setDoc(wishlistDocRef, { ...product, addedAt: serverTimestamp() });
         setIsInWishlist(true);
         toast.success("Product added to wishlist");
       }
@@ -109,7 +103,6 @@ const ProductCard = ({ product, isRecommendation = false }) => {
           url: window.location.href,
         });
       } else {
-        // Fallback for browsers that don't support Web Share API
         const url = window.location.href;
         await navigator.clipboard.writeText(url);
         toast.success("Link copied to clipboard!");

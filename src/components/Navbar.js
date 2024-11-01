@@ -92,12 +92,12 @@ const Navbar = () => {
             </button>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/Signin">
                 <button className="text-[#8E8E8E] px-3 py-1 rounded-md">
                   LOGIN
                 </button>
               </Link>
-              <Link href="/signin">
+              <Link href="/Signin">
                 <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
                   <p>Sign up now</p>
                   <img

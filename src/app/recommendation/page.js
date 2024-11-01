@@ -4,28 +4,24 @@ import ProductCard from "../../components/ProductCard";
 import { FaArrowRightLong, FaArrowLeftLong } from "react-icons/fa6"; 
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
+import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
 
 const productsPerPage = 3;
 
 const Recommendation = () => {
-  const [userId, setUserId] = useState(null);
+  const { user } = useAuth(); // Get the user from AuthContext
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentForYouPage, setCurrentForYouPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch userId from sessionStorage only on the client side
-  useEffect(() => {
-    const storedUserId = sessionStorage.getItem("userId");
-    if (storedUserId) setUserId(storedUserId);
-  }, []);
-
   const fetchWishlistProducts = async () => {
-    if (!userId) return; // Wait until userId is available
+    if (!user || !user.uid) return;
+    // Wait until userId is available
     setLoading(true);
     try {
-      const wishlistRef = collection(db, "users", userId, "wishlist");
+      const wishlistRef = collection(db, "users", user.uid, "wishlist");
       const snapshot = await getDocs(wishlistRef);
       const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setWishlistProducts(products);
@@ -39,7 +35,7 @@ const Recommendation = () => {
 
   useEffect(() => {
     fetchWishlistProducts();
-  }, [userId]); // Add userId as a dependency
+  }, [user]); // Add user as a dependency
 
   // Pagination logic for wishlist products
   const totalWishlistPages = Math.ceil(wishlistProducts.length / productsPerPage);
