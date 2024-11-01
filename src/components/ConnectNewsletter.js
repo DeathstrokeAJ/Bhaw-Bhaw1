@@ -18,7 +18,7 @@ const ConnectNewsletter = ({ bg = '#C9ABA0' }) => {
   }, []);
 
   const handleSubscribe = async () => {
-    if (!email) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setMessage('Please enter a valid email address.');
       return;
     }
@@ -32,6 +32,11 @@ const ConnectNewsletter = ({ bg = '#C9ABA0' }) => {
       sessionStorage.setItem("subscribedStatus", "true");
       sessionStorage.setItem("prefilledEmail", email);
       setEmail('');
+
+      // Clear message after a few seconds
+      setTimeout(() => {
+        setMessage('');
+      }, 5000);
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -43,16 +48,20 @@ const ConnectNewsletter = ({ bg = '#C9ABA0' }) => {
     <div className="py-16 md:py-20 font-poppins" style={{ backgroundColor: bg }}>
       <div className="container mx-auto text-center px-4">
         <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold text-white mb-4 leading-tight tracking-wider">
-          Lets Connect Our Newsletter
+          Let's Connect Our Newsletter
         </h2>
         <p className="text-white md:mb-8 lg:mx-52 leading-relaxed tracking-wide">
           Stay updated with the latest grooming tips, offers, and pet care advice by subscribing to our newsletter.
         </p>
+        {message && <p className="text-white">{message}</p>}
         <div className="flex flex-col md:flex-row mt-10 justify-center items-center gap-4">
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (message) setMessage(''); // Clear message on input change
+            }}
             placeholder="Enter your email"
             className="px-4 py-3 w-full md:w-80 rounded text-gray-700 border-none focus:outline-none"
             disabled={!!message && message.includes("already subscribed")}
