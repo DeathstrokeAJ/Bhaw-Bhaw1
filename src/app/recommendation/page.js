@@ -18,7 +18,7 @@ const Recommendation = () => {
   // Fetch userId from sessionStorage only on the client side
   useEffect(() => {
     const storedUserId = sessionStorage.getItem("userId");
-    setUserId(storedUserId);
+    if (storedUserId) setUserId(storedUserId);
   }, []);
 
   const fetchWishlistProducts = async () => {
@@ -41,20 +41,23 @@ const Recommendation = () => {
     fetchWishlistProducts();
   }, [userId]); // Add userId as a dependency
 
-  // Pagination logic remains unchanged...
+  // Pagination logic for wishlist products
   const totalWishlistPages = Math.ceil(wishlistProducts.length / productsPerPage);
   const indexOfLastWishlistProduct = currentPage * productsPerPage;
   const indexOfFirstWishlistProduct = indexOfLastWishlistProduct - productsPerPage;
   const currentWishlistProducts = wishlistProducts.slice(indexOfFirstWishlistProduct, indexOfLastWishlistProduct);
-  
+
+  // Create a unique set of categories from the wishlist products
   const categories = [...new Set(wishlistProducts.map(product => product.category))];
+
+  // Filter products based on the user's wishlist categories for recommendations
   const forYouProducts = wishlistProducts.filter(product => categories.includes(product.category));
   const totalForYouPages = Math.ceil(forYouProducts.length / productsPerPage);
   const indexOfLastForYouProduct = currentForYouPage * productsPerPage;
   const indexOfFirstForYouProduct = indexOfLastForYouProduct - productsPerPage;
   const currentForYouProducts = forYouProducts.slice(indexOfFirstForYouProduct, indexOfLastForYouProduct);
 
-  // Function to get pagination numbers remains unchanged...
+  // Function to get pagination numbers
   const getPaginationNumbers = (currentPage, totalPages) => {
     const paginationNumbers = [];
     let startPage = Math.max(1, currentPage - 1);
@@ -84,7 +87,6 @@ const Recommendation = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
-
   return (
     <div className="lg:px-12 bg-white text-black p-6 font-poppins">
       <div className="mb-6">
@@ -95,7 +97,6 @@ const Recommendation = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {currentWishlistProducts.map((product) => (
               <ProductCard key={product.id} product={product} isRecommendation={true} />
-
             ))}
           </div>
         )}
