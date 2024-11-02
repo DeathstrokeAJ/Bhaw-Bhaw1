@@ -315,7 +315,7 @@ const ProductDetail = () => {
 
       {/* Pagination Controls */}
       <div className="flex justify-center mt-8 items-center">
-        <div
+        <div  
           className={`cursor-pointer mr-12 ${currentPage === 1 ? "text-[#C4B0A9]" : "text-[#85716B]"}`}
           onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
         >
