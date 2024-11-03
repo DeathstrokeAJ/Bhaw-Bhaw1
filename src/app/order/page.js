@@ -1,7 +1,7 @@
 "use client";
-import CalendarAndSlot from '@/components/CalenderAndSlots';
-import ContactInformation from '@/components/ContactInformation';
-import ReviewInformation from '@/components/ReviewInformation';
+import CalendarAndSlot from '../../components/CalenderAndSlots';
+import ContactInformation from '../../components/ContactInformation';
+import ReviewInformation from '../../components/ReviewInformation';
 import React, { useState } from 'react';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig"; // Ensure this path is correct
@@ -12,7 +12,6 @@ const MultiStepForm = () => {
   const [formData, setFormData] = useState({
     contactInfo: {},
     calendarAndSlot: {},
-    reviewInfo: {},
   });
 
   const nextStep = () => {
@@ -24,10 +23,10 @@ const MultiStepForm = () => {
 
   const prevStep = () => setStep(step - 1);
 
-  const handleFormDataChange = (data) => {
+  const handleFormDataChange = (section, data) => {
     setFormData(prev => ({
       ...prev,
-      ...data
+      [section]: data,
     }));
   };
 
@@ -54,32 +53,27 @@ const MultiStepForm = () => {
   };
 
   const handleSubmit = async () => {
-    // Create a custom document ID (e.g., based on timestamp)
     const customDocId = `form-${Date.now()}`;
   
     try {
-      await setDoc(doc(db, "bookService", customDocId), { // Change the collection name here
-        contactInfo: formData.contactInfo,
-        calendarAndSlot: formData.calendarAndSlot,
-        reviewInfo: formData.reviewInfo,
+      await setDoc(doc(db, "bookService", customDocId), {
+        ...formData,
         createdAt: new Date(),
       });
       console.log("Form data saved successfully!");
       
-      // Optionally reset the form or redirect the user
+      // Reset form after submission
       setFormData({
         contactInfo: {},
         calendarAndSlot: {},
-        reviewInfo: {},
       });
-      setVisitedSteps([]); // Reset visited steps
-      setStep(1); // Reset to the first step
+      setVisitedSteps([]);
+      setStep(1);
     } catch (error) {
       console.error("Error saving form data: ", error);
     }
   };
   
-
   return (
     <div className="flex px-10 flex-col bg-white items-center justify-center font-montserrat">
       <div className="w-full bg-white p-8 rounded-lg">
@@ -107,9 +101,28 @@ const MultiStepForm = () => {
           ))}
         </div>
 
-        {step === 1 && <ContactInformation nextStep={nextStep} handleFormDataChange={handleFormDataChange} />}
-        {step === 2 && <CalendarAndSlot nextStep={nextStep} prevStep={prevStep} handleFormDataChange={handleFormDataChange} />}
-        {step === 3 && <ReviewInformation prevStep={prevStep} onSubmit={handleSubmit} />}
+        {step === 1 && (
+          <ContactInformation
+            nextStep={nextStep}
+            handleFormDataChange={(data) => handleFormDataChange('contactInfo', data)}
+            formData={formData.contactInfo}
+          />
+        )}
+        {step === 2 && (
+          <CalendarAndSlot
+            nextStep={nextStep}
+            prevStep={prevStep}
+            handleFormDataChange={(data) => handleFormDataChange('calendarAndSlot', data)}
+            formData={formData.calendarAndSlot}
+          />
+        )}
+        {step === 3 && (
+          <ReviewInformation
+            prevStep={prevStep}
+            formData={formData}
+            onSubmit={handleSubmit}
+          />
+        )}
       </div>
     </div>
   );
