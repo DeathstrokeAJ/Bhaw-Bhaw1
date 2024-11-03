@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const userId = sessionStorage.getItem('userId');
+      const userId = localStorage.getItem('userId');
 
       if (userId) {
         try {
@@ -29,12 +29,12 @@ export const AuthProvider = ({ children }) => {
             setUser({ id: userDoc.id, ...userDoc.data() });
           } else {
             setUser(null);
-            sessionStorage.removeItem('userId');
+            localStorage.removeItem('userId');
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           setUser(null);
-          sessionStorage.removeItem('userId');
+          localStorage.removeItem('userId');
         }
       } else {
         setUser(null);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('userId');
+    localStorage.removeItem('userId');
     setUser(null);
   };
 

@@ -2,23 +2,22 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FiMenu } from "react-icons/fi";
-import { useAuth } from "../app/context/AuthContext"; // Update this import path as needed
+import { useAuth } from "../app/context/AuthContext"; // Ensure this import path is correct
 import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, handleLogout } = useAuth(); // Use handleLogout instead of logout
   const router = useRouter();
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
 
-  // Logout function
-  const handleLogout = () => {
-    logout();
+  const onLogout = () => {
+    handleLogout(); // Calls the function from AuthContext
     console.log("User logged out");
-    router.push("/Signin");
+    router.push("/Signin"); 
   };
 
   return (
@@ -83,7 +82,7 @@ const Navbar = () => {
             </button>
           </Link>
           {user ? (
-            <button onClick={handleLogout}>
+            <button onClick={onLogout}>
               <img
                 src="/images/navbar/profile.png"
                 alt="Profile"

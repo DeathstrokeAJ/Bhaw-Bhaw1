@@ -32,7 +32,7 @@ const ProductGrid = () => {
   }, []);
 
   useEffect(() => {
-    const storedUser = JSON.parse(sessionStorage.getItem('currentUser'));
+    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
     if (storedUser) {
       setUserId(storedUser.uid); // Set user ID from session storage
     }

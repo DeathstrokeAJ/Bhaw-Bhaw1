@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from "react";
 import { db } from "../../../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth } from "../../app/context/AuthContext";
+import { toast } from "react-toastify";
 
 export const CartWishlistContext = createContext();
 
@@ -27,9 +28,16 @@ export const CartWishlistProvider = ({ children }) => {
 
   const removeFromWishlist = async (productId) => {
     if (!user) return;
-    setWishlist((prevWishlist) => prevWishlist.filter((item) => item.id !== productId));
-    const docRef = doc(db, "users", user.uid, "wishlist", productId);
-    await setDoc(docRef, { deleted: true });
+  
+    try {
+      const wishlistDocRef = doc(db, "users", user.uid, "wishlist", productId);
+      await setDoc(wishlistDocRef, {}, { merge: true }); // Remove by merging with an empty object
+      setIsInWishlist(false); // Update wishlist status in the component
+      toast.success("Product removed from wishlist");
+    } catch (error) {
+      console.error("Error removing product from wishlist:", error);
+      toast.error("Failed to remove product from wishlist");
+    }
   };
   const removeFromCart = async (productId) => {
     if (!user) return;

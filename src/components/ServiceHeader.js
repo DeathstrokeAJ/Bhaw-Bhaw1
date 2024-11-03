@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from "next/link"
 
 const PetJoySection = () => {
   return (
@@ -13,9 +14,11 @@ const PetJoySection = () => {
           That’s why we provide loving, personalized pet sitting
           services tailored to their needs.
         </p>
+        <Link href="/order">
         <button className="bg-[#FFEB3B] font-poppins  text-black px-2 py-1 rounded-md ">
-          book Now
+          Book Now
         </button>
+        </Link>
       </div>
 
       {/* Circular Images */}

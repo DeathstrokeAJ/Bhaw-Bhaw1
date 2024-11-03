@@ -32,7 +32,7 @@ const CheckoutPage = () => {
   // Redirect if no user
   useEffect(() => {
     if (!user) {
-      router.push('/signin');
+      router.push('/Signin');
     }
   }, [user, router]);
 
@@ -88,7 +88,7 @@ const CheckoutPage = () => {
     }
 
     try {
-      const shippingId = `${user.uid}_${Date.now()}`;
+      const shippingId = `SID ${Date.now()}`;
       await setDoc(doc(db, "users", user.uid, "shipping", shippingId), {
         ...formData,
         createdAt: new Date().toISOString()
@@ -126,7 +126,7 @@ const CheckoutPage = () => {
   };
 
   const pushOrderDetails = async () => {
-    const orderId = `${user.uid}_${Date.now()}`;
+    const orderId = `OID ${Date.now()}`;
     const orderData = {
       userId: user.uid,
       products: cartItems,
