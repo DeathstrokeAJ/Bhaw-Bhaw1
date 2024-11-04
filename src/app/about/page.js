@@ -3,34 +3,34 @@ import React from "react";
 
 const PetCareSection = () => {
   return (
-    <section className="bg-white">
+    <section className="bg-[#fcfcfc]">
       {/* Main Title and Image Section */}
-      <div className="text-center lg:mb-16 relative mx-auto pt-8">
-        {/* Hero Image */}
+      <div className="text-center relative mx-auto">
+        {/* Hero Image (Hidden on small screens) */}
         <div className="relative flex justify-center">
           <img
             src="/images/about/hero1.png"
             alt="Happy dog"
-            className="w-full max-w-[50rem] h-auto" // Responsive width and height
+            className="w-full max-w-[45rem] h-auto hidden lg:block" // Hidden on small screens
           />
           {/* Additional Image Overlaid on Hero Image */}
-          <div className="absolute mt-32 md:mt-44 inset-0 flex justify-center items-center">
+          <div className="absolute lg:mt-72 mt-52  inset-0 flex justify-center items-center">
             <img
-              src="/images/about/hero2.png" // Path to your new image
-              alt="Another happy pet" // Update the alt text appropriately
-              className="w-[20rem] max-w-full h-auto" // Responsive width
+              src="/images/about/hero2.png"
+              alt="Another happy pet"
+              className="w-[23rem] max-w-full h-auto"
             />
           </div>
         </div>
       </div>
 
       {/* Story Section */}
-      <div className="relative mb-16 mt-20 flex flex-col lg:flex-row items-center justify-center">
+      <div className="relative mb-7 lg:mb-16 mt-52 flex flex-col lg:flex-row items-center justify-center">
         <div className="flex justify-center mb-6 lg:mb-0 lg:mr-8">
           <img
             src="/images/about/image.png"
             alt="Pet 1"
-            className="h-[30rem] w-[30rem] rounded object-contain max-w-full max-h-[30rem]" // Responsive max width and height
+            className="h-[30rem] w-[30rem] mt-52 rounded object-contain max-w-full max-h-[30rem]"
           />
         </div>
 
@@ -44,7 +44,7 @@ const PetCareSection = () => {
             />
             Our Story
           </h2>
-          <p className="text-[#85716B] text-2xl lg:text-3xl font-kiwi leading-10"> {/* Adjusted font size for smaller screens */}
+          <p className="text-[#85716B] text-2xl lg:text-3xl font-kiwi leading-10 lg:leading-[2.6rem]">
             BhawBhaw was born out of a deep love for animals of all kinds. Our
             founders realized that while pet care was improving for dogs and
             cats, there were fewer trusted options for fish, birds, and small
@@ -57,21 +57,21 @@ const PetCareSection = () => {
       </div>
 
       {/* Bottom Illustrations */}
-      <div className="flex flex-wrap justify-evenly pb-10 space-x-6">
+      <div className="flex flex-wrap pt-10 justify-evenly lg:pb-32 space-x-6">
         <img
           src="images/about/bottom1.png"
           alt="Cat doodle 1"
-          className="w-64 h-64 mb-4 md:mb-0"
+          className="w-52 h-52 mb-4 md:mb-0"
         />
         <img
           src="images/about/bottom2.png"
           alt="Dog doodle 2"
-          className="w-64 h-64 mb-4 md:mb-0"
+          className="w-52 h-52 mb-4 md:mb-0"
         />
         <img
           src="images/about/bottom3.png"
           alt="Person with pet"
-          className="w-64 h-64 mb-4 md:mb-0"
+          className="w-52 h-52 mb-4 md:mb-0"
         />
       </div>
       <ConnectNewsletter />

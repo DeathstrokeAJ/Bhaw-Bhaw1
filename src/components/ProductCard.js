@@ -142,7 +142,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
         />
       </div>
 
-      <div className="bg-[#F3EAE7] mx-3 py-1 rounded-lg mt-6">
+      <div className="bg-[#F3EAE7] mx-3 py-3 rounded-lg mt-10">
         <img
           className="w-full h-48 object-contain"
           src={product.images}
@@ -175,13 +175,13 @@ const ProductCard = ({ product, isRecommendation = false }) => {
 
       <div className="py-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-black text-lg text-[#2C2C2C]">{product.title}</h3>
-          <span className="text-lg font-semibold text-gray-800">
+          <h3 className="font-black text-sm text-[#2C2C2C]">{product.title}</h3>
+          <span className="text-sm font-semibold text-gray-800">
             ₹{product.price}
           </span>
         </div>
 
-        <p className="text-gray-700 my-5 text-sm w-64">{product.description}</p>
+        <p className="text-gray-700 my-5 text-xs w-64">{product.description}</p>
 
         <div className="flex items-center">
           {Array.from({ length: Math.floor(product.rating || 0) }, (_, index) => (
@@ -189,10 +189,10 @@ const ProductCard = ({ product, isRecommendation = false }) => {
               key={index}
               src="/images/common/star.png"
               alt="star"
-              className="w-6 h-6"
+              className="w-5 h-5"
             />
           ))}
-          <span className="text-gray-600 text-sm ml-4">({product.reviews || 0})</span>
+          <span className="text-gray-600 text-xs ml-4">({product.reviews || 0})</span>
         </div>
       </div>
     </div>
