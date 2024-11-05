@@ -1,6 +1,7 @@
-// Firebase initialization for Firestore and optional Analytics
+// Firebase initialization for Firestore, Authentication, and optional Analytics
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 // Firebase configuration object
@@ -20,6 +21,9 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore
 const db = getFirestore(app);
 
+// Initialize Firebase Authentication
+const auth = getAuth(app);
+
 // Initialize Analytics if supported
 let analytics;
 isSupported()
@@ -32,5 +36,14 @@ isSupported()
     console.error("Analytics support check failed:", error);
   });
 
-// Export Firestore and Analytics (if initialized)
-export { db, analytics };
+// Export Firestore, Auth, and Analytics (if initialized)
+export { db, auth, analytics };
+
+// Example usage of onAuthStateChanged (optional if you want to handle auth state here)
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("User is logged in:", user);
+  } else {
+    console.log("User is logged out.");
+  }
+});
