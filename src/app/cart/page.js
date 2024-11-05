@@ -20,6 +20,7 @@ const Cart = () => {
     } else {
       sessionStorage.setItem('subtotal', subtotal);
       sessionStorage.setItem('total', total);
+      sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
       // window.location.href = './checkout';
     }
   };

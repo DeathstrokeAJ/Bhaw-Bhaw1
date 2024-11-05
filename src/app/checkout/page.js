@@ -40,20 +40,26 @@ const CheckoutPage = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       if (!user?.uid) return;
-
+    
       try {
         setLoading(true);
         const userDocRef = doc(db, "users", user.uid);
         const cartSnapshot = await getDocs(collection(userDocRef, "cart"));
         const items = cartSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          quantity: doc.data().quantity || 1 // Default to 1 if quantity is missing
         }));
         
         setCartItems(items);
         
         // Calculate totals
-        const itemSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const itemSubtotal = items.reduce((sum, item) => {
+          const price = parseFloat(item.price) || 0;
+          const quantity = parseInt(item.quantity) || 1;
+          return sum + (price * quantity);
+        }, 0);
+        
         setSubtotal(itemSubtotal);
         setTotal(itemSubtotal); // Add shipping cost if needed
         
@@ -87,6 +93,13 @@ const CheckoutPage = () => {
       return;
     }
 
+    // Check if all required fields are filled
+    const { email, firstName, lastName, address, apartment, state, city, postalCode } = formData;
+    if (!email || !firstName || !lastName || !address || !state || !city || !postalCode) {
+      setError("All fields are required.");
+      return;
+    }
+
     try {
       const shippingId = `SID ${Date.now()}`;
       await setDoc(doc(db, "users", user.uid, "shipping", shippingId), {
@@ -94,11 +107,13 @@ const CheckoutPage = () => {
         createdAt: new Date().toISOString()
       });
       // Continue with checkout flow
+      setError(null); // Clear any previous error
     } catch (err) {
       console.error("Error saving shipping info:", err);
       setError("Failed to save shipping information");
     }
   };
+
 
   const handleProceedToPayment = async () => {
     if (!user?.uid) {
@@ -126,7 +141,7 @@ const CheckoutPage = () => {
   };
 
   const pushOrderDetails = async () => {
-    const orderId = `OID ${Date.now()}`;
+    const orderId = `OID${Date.now()}`;
     const orderData = {
       userId: user.uid,
       products: cartItems,
