@@ -4,6 +4,7 @@ import { db } from "../../../firebaseConfig";
 import { collection, query, where, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { useAuth } from '../../app/context/AuthContext'; // Adjust the path as needed
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [coupon, setCoupon] = useState("");
@@ -13,7 +14,7 @@ const Cart = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isPopupVisible1, setIsPopupVisible1] = useState(false);
   const [isPopupVisible2, setIsPopupVisible2] = useState(false);
-
+  const router = useRouter();
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
       setIsPopupVisible(true); // Show the popup if the cart is empty

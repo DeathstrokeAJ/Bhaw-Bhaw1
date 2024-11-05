@@ -48,7 +48,7 @@ const Footer = () => {
               </div>
               <div>
                 <div>uvesmursalin3@gmail.com</div>
-                <div>www.webtechsolution.in</div>
+                <div>bhawbhaw.com</div>
               </div>
             </div>
             
@@ -64,7 +64,7 @@ const Footer = () => {
 
       {/* Bottom Footer */}
       <div className="border-t border-white/40 mt-8 pt-4 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-        <p className="text-sm text-white">&copy; 2023 Webtechsolution.in</p>
+        <p className="text-sm text-white">&copy; 2024 bhawbhaw.com</p>
         <div className="space-x-4 mt-2 md:mt-0">
           <a href="#" className="text-white text-sm hover:underline">Privacy Policy</a>
           <span className="text-white">|</span>
