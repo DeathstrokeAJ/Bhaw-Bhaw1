@@ -16,12 +16,12 @@ const Cart = () => {
 
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) {
-      setIsPopupVisible(true);
+      setIsPopupVisible(true); // Show the popup if the cart is empty
     } else {
+      // Proceed to checkout logic
       sessionStorage.setItem('subtotal', subtotal);
       sessionStorage.setItem('total', total);
-      sessionStorage.setItem('cartItems', JSON.stringify(cartItems));
-      // window.location.href = './checkout';
+      router.push('/checkout'); // Use router.push to navigate to the checkout page
     }
   };
 
@@ -213,11 +213,11 @@ const Cart = () => {
     </button>
     {error && <p className="text-red-600 mt-2">{error}</p>}
   </div>
-  <Link href="/checkout">
+  
   <button className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4" onClick={handleProceedToCheckout}>
     <p>Proceed to Checkout</p>
   </button>
-</Link>
+
 
 </div>
 
@@ -226,6 +226,11 @@ const Cart = () => {
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg shadow-lg">
+          <img
+                    src="/images/services/cancel.png"
+                    alt="Fail Icon"
+                    className="w-32 h-32 mb-7"
+                  />
             <h3 className="text-lg font-semibold">Your cart is empty!</h3>
             <p>Please add items to your cart before proceeding.</p>
             <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup}>Close</button>
@@ -236,6 +241,11 @@ const Cart = () => {
       {isPopupVisible1 && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg shadow-lg">
+          <img
+                    src="/images/services/cancel.png"
+                    alt="Fail Icon"
+                    className="w-32 h-32 mb-7"
+                  />
             <h3 className="text-lg font-semibold">Invalid Coupon!</h3>
             <p>The coupon code you entered is not valid.</p>
             <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup1}>Close</button>
@@ -246,6 +256,11 @@ const Cart = () => {
       {isPopupVisible2 && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-5 rounded-lg shadow-lg">
+          <img
+                    src="/images/services/cancel.png"
+                    alt="Fail Icon"
+                    className="w-32 h-32 mb-7"
+                  />
             <h3 className="text-lg font-semibold">Minimum Subtotal Not Attained!</h3>
             <p>To apply this coupon, your subtotal must be a bit higher.</p>
             <button className="mt-3 bg-[#E57A7A] text-white px-4 py-2 rounded" onClick={closePopup2}>Close</button>

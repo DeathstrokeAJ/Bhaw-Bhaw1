@@ -96,7 +96,7 @@ const SignInForm = () => {
         <div className="w-full flex justify-center lg:mt-10">
           <button
             type="submit"
-            className="w-full lg:w-fit lg:rounded-full bg-baw-red text-white font-bold py-3 px-7 rounded-md flex justify-center items-center hover:bg-baw-yellow"
+            className="w-full lg:w-fit lg:rounded-full bg-red-500 text-white font-bold py-3 px-7 rounded-md flex justify-center items-center hover:bg-yellow-400"
             disabled={loading}
           >
             <span>{loading ? "Signing In..." : "SIGN IN"}</span>
