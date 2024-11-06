@@ -1,7 +1,7 @@
 import { auth, db } from "../../../../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-
+//Signup API
 export default async function signup(req, res) {
   if (req.method === "POST") {
     const { username, email, password } = req.body;
