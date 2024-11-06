@@ -3,7 +3,7 @@ import React from 'react'
 
 const MoreInfo = () => {
   return (
-    <div className="m-10 grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#F3EAE7] rounded-xl text-gray-600">
+    <div className="m-10 grid grid-cols-1 md:grid-cols-3 gap-4 rounded-xl text-gray-600">
     <div className="flex items-center space-x-4 p-4">
       <img src="/images/contact/clock.png" alt="Clock" className="w-16 h-16" />
       <div>

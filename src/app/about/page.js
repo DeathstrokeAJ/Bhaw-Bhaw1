@@ -25,7 +25,7 @@ const PetCareSection = () => {
       </div>
 
       {/* Story Section */}
-      <div className="relative mb-7 lg:mb-16 mt-52 flex flex-col lg:flex-row items-center justify-center">
+      <div className="relative mb-7 lg:mb-16 mt-52 md:mt-32 flex flex-col lg:flex-row items-center justify-center">
         <div className="flex justify-center mb-6 lg:mb-0 lg:mr-8">
           <img
             src="/images/about/image.png"

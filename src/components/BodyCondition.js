@@ -2,7 +2,7 @@ import React from "react";
 
 const CustomLayoutPage = () => {
   return (
-    <div className="bg-gray-50 text-white font-poppins p-4 sm:p-8 space-y-6">
+    <div className="bg-gray-50 text-white max-w-5xl font-poppins p-4 sm:p-8 space-y-6">
       {/* Full-width card */}
       <div className="bg-[#C4B0A9] items-center px-6 sm:px-10 rounded-[2.5rem] space-y-4 flex flex-col sm:flex-row justify-center items-start">
         <div className="bg-[#C4B0A9] rounded-[2.5rem] p-6 space-y-4 flex flex-col items-start">
