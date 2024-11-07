@@ -12,9 +12,24 @@ const calculateTotal = (cartItems) => {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { userId, cartItems, paymentMethod, shippingAddress } = req.body;
+      const {
+        userId,
+        cartItems,
+        paymentMethod,
+        shippingAddress: {
+          firstName,
+          lastName,
+          address,
+          apartment,
+          state,
+          city,
+          postalCode,
+        },
+        email,
+        checked
+      } = req.body;
 
-      if (!userId || !cartItems || !paymentMethod || !shippingAddress) {
+      if (!userId || !cartItems || !paymentMethod || !email || !firstName || !lastName || !address || !city || !state || !postalCode) {
         return res.status(400).json({ error: 'Required fields are missing' });
       }
 
@@ -26,7 +41,16 @@ export default async function handler(req, res) {
         items: cartItems,
         totalAmount,
         paymentMethod,
-        shippingAddress,
+        shippingAddress: {
+          firstName,
+          lastName,
+          address,
+          apartment,
+          state,
+          city,
+          postalCode,
+        },
+        contactInfo: { email, checked },
         status: 'Initialized',
         createdAt: new Date(),
       };
