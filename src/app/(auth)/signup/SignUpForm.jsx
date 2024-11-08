@@ -115,7 +115,7 @@ const SignUpForm = () => {
             className="w-full lg:w-fit lg:rounded-full bg-red-500 text-white font-bold py-3 px-7 rounded-md flex justify-center items-center hover:bg-yellow-400"
             disabled={loading}
           >
-            <span>{loading ? "Signing Up..." : "SIGN Up"}</span>
+            <span>{loading ? "Signing Up..." : "SIGN UP"}</span>
             <span className="ml-2">➔</span>
           </button>
         </div>

@@ -6,11 +6,13 @@ import React, { useEffect, useState } from 'react';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../../../firebaseConfig";
 import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { clearBookingData, setCalendarAndSlot, setContactInfo } from '@/redux/serviceSlice';
 
 const MultiStepForm = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.userId);
   const selectedService = useSelector((state) => state.service.selectedService);
 
@@ -23,7 +25,7 @@ const MultiStepForm = () => {
 
   useEffect(() => {
     if (!selectedService) {
-      router.push('/services');
+      router.push('/');
     }
   }, [selectedService, router]);
 
@@ -41,6 +43,11 @@ const MultiStepForm = () => {
       ...prev,
       [section]: data,
     }));
+    if (section === 'contactInfo') {
+      dispatch(setContactInfo(data));
+    } else if (section === 'calendarAndSlot') {
+      dispatch(setCalendarAndSlot(data));
+    }
   };
 
   const getStepStyle = (currentStep) => {
@@ -74,7 +81,7 @@ const MultiStepForm = () => {
       body: JSON.stringify({
         userId,
         formData: {
-          ...selectedService,
+          selectedService,
           contactInfo: formData.contactInfo,
           calendarAndSlot: formData.calendarAndSlot,
         },
@@ -83,6 +90,7 @@ const MultiStepForm = () => {
 
     if (response.ok) {
       toast.success('Booking successful');
+      dispatch(clearBookingData())
     } else {
       console.error('Booking failed');
     }
@@ -134,7 +142,7 @@ const MultiStepForm = () => {
           <ReviewInformation
             prevStep={prevStep}
             formData={formData}
-            onSubmit={handleSubmit}
+            handleSubmit={handleSubmit}
           />
         )}
       </div>

@@ -3,41 +3,35 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../../firebaseConfig';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 
 const ReviewInformation = ({
   prevStep,
   formData = {},
+  handleSubmit
 }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Track user login status
+  const data = useSelector(state=> state.service )
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); 
   const { contactInfo, calendarAndSlot } = formData;
+  const userId = useSelector(state => state.user.userId)
 
-  // Check for user ID in local storage on component mount
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
     if (userId) {
       setIsUserLoggedIn(true); // User is logged in
     } 
   }, []); // Empty dependency array to run only on mount
 
   const handleConfirmSubmit = async () => {
-    const userId = localStorage.getItem('userId'); // Ensure user ID is retrieved
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const bookingID = `BID_${Date.now()}`;
-      const bookingsRef = collection(db, 'bookings');
-      await setDoc(doc(bookingsRef, bookingID), {
-        ...formData,
-        bookingID,
-        userId, // Save userId with booking
-        createdAt: new Date().toISOString(),
-      });
       setIsPopupVisible(true);
+      await handleSubmit()
     } catch (error) {
       console.error('Error submitting booking:', error);
       setError('An error occurred while booking. Please try again.');

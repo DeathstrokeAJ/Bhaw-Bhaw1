@@ -16,7 +16,7 @@ const CalendarAndSlot = ({ nextStep, prevStep, handleFormDataChange }) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      handleFormDataChange({ calendarAndSlot: { date, timeSlot, duration } }); // Pass data up
+      handleFormDataChange({date, timeSlot, duration});
       nextStep();
     }
   };

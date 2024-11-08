@@ -1,10 +1,8 @@
-// pages/api/services/bookService.js
 import { db } from '../../../../firebaseConfig';
 import { collection, doc, setDoc } from 'firebase/firestore';
 
-// Default export function for Next.js API route
 export default async function handler(req, res) {
-  if (req.method === 'POST') {  // Check if the request is a POST request
+  if (req.method === 'POST') {
     const { userId, formData } = req.body;
 
     if (!userId || !formData) {
@@ -12,10 +10,9 @@ export default async function handler(req, res) {
     }
 
     try {
-      const bookingID = `BID_${Date.now()}`; // Generate a unique booking ID
+      const bookingID = `BID${Date.now()}`;
       const bookingsRef = collection(db, 'bookings');
 
-      // Save the booking document
       await setDoc(doc(bookingsRef, bookingID), {
         ...formData,
         bookingID,

@@ -8,7 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/redux/userSlice";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../../../firebaseConfig";
 
 const SignInForm = () => {
@@ -20,14 +20,13 @@ const SignInForm = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    // Check if user is already signed in on component mount
-    const checkAuthState = async () => {
-      if (user?.name) {
-        toast.success("Login successful");
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser && user?.name) {
+        toast.success("Already logged in");
         router.push("/");
       }
-    };
-    checkAuthState();
+    });
+    return () => unsubscribe();
   }, [user, router]);
 
   const handleSubmit = async (e) => {
@@ -40,7 +39,7 @@ const SignInForm = () => {
       const q = query(usersRef, where("email", "==", email));
       
       const querySnapshot = await getDocs(q);
-      
+
       if (querySnapshot.empty) {
         toast.error("No user found with this email");
         setLoading(false);
@@ -61,7 +60,7 @@ const SignInForm = () => {
           userId: userDoc.id,
         })
       );
-      
+
       toast.success("Login successful");
       router.push("/");
 
@@ -126,5 +125,7 @@ const SignInForm = () => {
     </div>
   );
 };
+
+SignInForm.displayName = "SignInForm"; 
 
 export default SignInForm;

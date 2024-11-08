@@ -13,8 +13,8 @@ export default function ContactForm({ nextStep, handleFormDataChange }) {
   const [focusedField, setFocusedField] = useState(null);
 
   const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-    setErrors({ ...errors, [field]: false }); // Clear the error for this field on change
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: false }));
     setFocusedField(field);
   };
 
@@ -34,7 +34,7 @@ export default function ContactForm({ nextStep, handleFormDataChange }) {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      handleFormDataChange({ contactInfo: formData }); // Pass form data to parent
+      handleFormDataChange({ ...formData });
       nextStep();
     }
   };

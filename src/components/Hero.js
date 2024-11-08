@@ -14,14 +14,14 @@ const PetPromoBanner = () => {
         </p>
         <button className="bg-[#FFEB3B] text-[#4D413E] font-semibold px-8 py-3 rounded-full flex items-center hover:bg-yellow-500 transition">
           Explore
-          <img           src="/images/Home/arrow.png" alt="Arrow" className="ml-2 w-5 h-5 object-contain" /> {/* Use your arrow image here */}
+          <img src="/images/Home/arrow.png" alt="Arrow" className="ml-2 w-5 h-5 object-contain" /> {/* Use your arrow image here */}
         </button>
       </div>
 
       {/* Image Section */}
       <div className="relative">
         <img
-          src="/images/Home/Hero.png"
+          src="/images/Home/hero.png"
           alt="Dog getting treat"
           className="w-[45rem] h-[34rem]"
         />

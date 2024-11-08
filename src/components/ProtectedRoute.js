@@ -41,19 +41,19 @@ const Protected = (WrappedComponent) => {
             } else {
               toast.error("User not found.");
               auth.signOut();
-              router.push("/");
+              router.push("/signin");
 
               console.log("User not found. Logging out.");
             }
           } catch (error) {
             console.error("Error fetching user data: ", error);
             toast.error("An error occurred.");
-            router.push("/");
+            router.push("/signin");
 
             console.log("Error fetching user data. Logging out.");
           }
         } else {
-          router.push("/");
+          router.push("/signin");
 
           console.log("No user authenticated. Logging out.");
         }

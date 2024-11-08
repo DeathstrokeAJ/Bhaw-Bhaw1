@@ -99,7 +99,7 @@ const Navbar = () => {
                   LOGIN
                 </button>
               </Link>
-              <Link href="/signin">
+              <Link href="/signup">
                 <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
                   <p>Sign up now</p>
                   <img
