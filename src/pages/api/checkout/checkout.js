@@ -1,14 +1,6 @@
 import { db } from '../../../../firebaseConfig';
 import { doc, setDoc, writeBatch } from 'firebase/firestore';
 
-const calculateTotal = (cartItems) => {
-  let total = 0;
-  cartItems.forEach(item => {
-    total += item.price * item.quantity;
-  });
-  return total;
-};
-
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
@@ -26,14 +18,13 @@ export default async function handler(req, res) {
           postalCode,
         },
         email,
-        checked
+        notification,
+        totalAmount
       } = req.body;
 
       if (!userId || !cartItems || !paymentMethod || !email || !firstName || !lastName || !address || !city || !state || !postalCode) {
         return res.status(400).json({ error: 'Required fields are missing' });
       }
-
-      const totalAmount = calculateTotal(cartItems);
 
       const orderId = 'OID' + Math.floor(Date.now() / 1000);
       const order = {
@@ -49,9 +40,10 @@ export default async function handler(req, res) {
           state,
           city,
           postalCode,
+          email
         },
-        contactInfo: { email, checked },
-        status: 'Initialized',
+        notification,
+        status: 'initialized',
         createdAt: new Date(),
       };
 

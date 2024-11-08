@@ -1,103 +1,44 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../app/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
-import toast from 'react-hot-toast'; // Optional: for better notifications
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, removeFromCart } from "../redux/cartSlice";
+import { addToWishlist, removeFromWishlist } from "../redux/wishlistSlice";
+import toast from 'react-hot-toast';
 
 const ProductCard = ({ product, isRecommendation = false }) => {
   const router = useRouter();
-  const { user } = useAuth();
+  const user = useSelector(state => state.user.userId);
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state => state.cart.items);
+  const wishlistItems = useSelector(state => state.wishlist.items);
+
   const [isProductInCart, setIsProductInCart] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const checkProductStatus = async () => {
-      if (user && product) {
-        // Check cart status
-        const cartDocRef = doc(db, "users", user.uid, "cart", product.id);
-        const cartDoc = await getDoc(cartDocRef);
-        setIsProductInCart(cartDoc.exists());
+    setIsProductInCart(cartItems.some(item => item.id === product.id));
+    setIsInWishlist(wishlistItems.some(item => item.id === product.id));
+  }, [cartItems, wishlistItems, product.id]);
 
-        // Check wishlist status
-        const wishlistDocRef = doc(db, "users", user.uid, "wishlist", product.id);
-        const wishlistDoc = await getDoc(wishlistDocRef);
-        setIsInWishlist(wishlistDoc.exists());
-      }
-    };
-    checkProductStatus();
-  }, [user, product]);
 
-  const handleBuyNow = () => {
-    if (!user) {
-      toast.error("Please sign in to continue");
-      router.push('/Signin');
-      return;
-    }
-  
-    // Set product ID in localStorage
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem('selectedProductId', product.id);
-    }
-  
-    const route = isRecommendation ? '/details' : '/productdetails';
-    router.push(route); // Navigate without passing the ID in the URL
-  };
-  
-
-  const handleCartAction = async () => {
-    if (!user) {
-      toast.error("Please sign in to continue");
-      router.push('/Signin');
-      return;
-    }
-
-    setLoading(true); // Start loading
-    try {
-      const cartDocRef = doc(db, "users", user.uid, "cart", product.id);
-      if (isProductInCart) {
-        await setDoc(cartDocRef, {}, { merge: true }); // Removing by merging with empty object
-        setIsProductInCart(false);
-        toast.success("Product removed from cart");
-      } else {
-        await setDoc(cartDocRef, { ...product, addedAt: serverTimestamp() });
-        setIsProductInCart(true);
-        toast.success("Product added to cart");
-      }
-    } catch (error) {
-      toast.error("Error updating cart: " + error.message);
-      console.error("Error updating cart:", error);
-    } finally {
-      setLoading(false); // Stop loading
+  const handleCartAction = () => {
+    if (isProductInCart) {
+      dispatch(removeFromCart(product));
+      toast.success("Product removed from cart");
+    } else {
+      dispatch(addToCart(product));
+      toast.success("Product added to cart");
     }
   };
 
-  const handleWishlistAction = async () => {
-    if (!user) {
-      toast.error("Please sign in to continue");
-      router.push('/Signin');
-      return;
-    }
-
-    setLoading(true); // Start loading
-    try {
-      const wishlistDocRef = doc(db, "users", user.uid, "wishlist", product.id);
-      if (isInWishlist) {
-        await setDoc(wishlistDocRef, {}, { merge: true }); // Removing by merging with empty object
-        setIsInWishlist(false);
-        toast.success("Product removed from wishlist");
-      } else {
-        await setDoc(wishlistDocRef, { ...product, addedAt: serverTimestamp() });
-        setIsInWishlist(true);
-        toast.success("Product added to wishlist");
-      }
-    } catch (error) {
-      toast.error("Error updating wishlist: " + error.message);
-      console.error("Error updating wishlist:", error);
-    } finally {
-      setLoading(false); // Stop loading
+  const handleWishlistAction = () => {
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product));
+      toast.success("Product removed from wishlist");
+    } else {
+      dispatch(addToWishlist(product));
+      toast.success("Product added to wishlist");
     }
   };
 
@@ -152,17 +93,10 @@ const ProductCard = ({ product, isRecommendation = false }) => {
 
       <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <button
-          onClick={handleBuyNow}
-          className="bg-white text-orange-500 font-bold py-2 px-4 mb-2 rounded"
-        >
-          Buy Now
-        </button>
-        <button
           onClick={handleCartAction}
-          className={`border border-white text-white font-bold py-2 px-4 rounded mb-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          disabled={loading}
+          className="border border-white text-white font-bold py-2 px-4 rounded mb-4"
         >
-          {loading ? 'Processing...' : (isProductInCart ? 'Remove from Cart' : 'Add to Cart')}
+          {isProductInCart ? 'Remove from Cart' : 'Add to Cart'}
         </button>
         <div className="flex space-x-6">
           <button onClick={handleShare} className="text-white text-sm">Share</button>
@@ -177,14 +111,14 @@ const ProductCard = ({ product, isRecommendation = false }) => {
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-black text-sm text-[#2C2C2C]">{product.title}</h3>
           <span className="text-sm font-semibold text-gray-800">
-            ₹{product.price}
+            ₹{product.sellingPrice}
           </span>
         </div>
 
         <p className="text-gray-700 my-5 text-xs w-64">{product.description}</p>
 
         <div className="flex items-center">
-          {Array.from({ length: Math.floor(product.rating || 0) }, (_, index) => (
+          {Array.from({ length: Math.floor(product.rating || 4) }, (_, index) => (
             <img
               key={index}
               src="/images/common/star.png"
@@ -192,7 +126,7 @@ const ProductCard = ({ product, isRecommendation = false }) => {
               className="w-5 h-5"
             />
           ))}
-          <span className="text-gray-600 text-xs ml-4">({product.reviews || 0})</span>
+          <span className="text-gray-600 text-xs ml-4">({product.reviews || 8})</span>
         </div>
       </div>
     </div>

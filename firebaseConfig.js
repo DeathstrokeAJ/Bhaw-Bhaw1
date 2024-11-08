@@ -40,10 +40,10 @@ isSupported()
 export { db, auth, analytics };
 
 // Example usage of onAuthStateChanged (optional if you want to handle auth state here)
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User is logged in:", user);
-  } else {
-    console.log("User is logged out.");
-  }
-});
+// onAuthStateChanged(auth, (user) => {
+//   if (user) {
+//     console.log("User is logged in:", user);
+//   } else {
+//     console.log("User is logged out.");
+//   }
+// });

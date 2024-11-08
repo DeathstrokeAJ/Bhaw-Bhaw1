@@ -1,18 +1,31 @@
 "use client";
-import CalendarAndSlot from '../../components/CalenderAndSlots';
-import ContactInformation from '../../components/ContactInformation';
-import ReviewInformation from '../../components/ReviewInformation';
-import React, { useState } from 'react';
+import CalendarAndSlot from '../../../components/CalenderAndSlots';
+import ContactInformation from '../../../components/ContactInformation';
+import ReviewInformation from '../../../components/ReviewInformation';
+import React, { useEffect, useState } from 'react';
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../../firebaseConfig"; // Ensure this path is correct
+import { db } from "../../../../firebaseConfig";
+import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 const MultiStepForm = () => {
+  const router = useRouter();
+  const userId = useSelector((state) => state.user.userId);
+  const selectedService = useSelector((state) => state.service.selectedService);
+
   const [step, setStep] = useState(1);
   const [visitedSteps, setVisitedSteps] = useState([]);
   const [formData, setFormData] = useState({
     contactInfo: {},
     calendarAndSlot: {},
   });
+
+  useEffect(() => {
+    if (!selectedService) {
+      router.push('/services');
+    }
+  }, [selectedService, router]);
 
   const nextStep = () => {
     if (!visitedSteps.includes(step)) {
@@ -53,24 +66,25 @@ const MultiStepForm = () => {
   };
 
   const handleSubmit = async () => {
-    const customDocId = `form-${Date.now()}`;
-  
-    try {
-      await setDoc(doc(db, "bookService", customDocId), {
-        ...formData,
-        createdAt: new Date(),
-      });
-      console.log("Form data saved successfully!");
-      
-      // Reset form after submission
-      setFormData({
-        contactInfo: {},
-        calendarAndSlot: {},
-      });
-      setVisitedSteps([]);
-      setStep(1);
-    } catch (error) {
-      console.error("Error saving form data: ", error);
+    const response = await fetch('/api/services/bookService', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        formData: {
+          ...selectedService,
+          contactInfo: formData.contactInfo,
+          calendarAndSlot: formData.calendarAndSlot,
+        },
+      }),
+    });
+
+    if (response.ok) {
+      toast.success('Booking successful');
+    } else {
+      console.error('Booking failed');
     }
   };
   

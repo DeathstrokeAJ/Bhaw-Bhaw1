@@ -8,16 +8,13 @@ export default async function handler(req, res) {
 
     try {
       
-      const uid = `CID ${Date.now()}`;
-      const now = new Date().toLocaleString('en-IN', {
-        timeZone: 'Asia/Kolkata',
-      });
+      const uid = `CID${Date.now()}`;
 
       const combinedData = {
         ...personalInfo,
         ...serviceInfo,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       await setDoc(doc(db, 'contacts', uid), combinedData);
       return res.status(200).json({

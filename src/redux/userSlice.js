@@ -1,23 +1,35 @@
-// redux/userSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+"use client"
+
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+  userData: {
+    name: "",
+    email: "",
+    isSubscribedToNewsletter: false
+  },
+  userId: null,
+};
 
 const userSlice = createSlice({
-  name: '',
-  initialState: {
-    email: '',
-    password: '',
-  },
+  name: "user",
+  initialState,
   reducers: {
-    saveCredentials: (state, action) => {
-      state.email = action.payload.email;
-      state.password = action.payload.password;
+    setUser(state, action) {
+      state.userData = { ...state.userData, ...action.payload.userData };
+      if (action.payload.userId) {
+        state.userId = action.payload.userId;
+      }
     },
-    clearCredentials: (state) => {
-      state.email = '';
-      state.password = '';
+    clearUser(state) {
+      state.userData = {
+        name: "",
+        email: "",
+      };
+      state.userId = null;
     },
   },
 });
 
-export const { saveCredentials, clearCredentials } = userSlice.actions;
+export const { setUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;

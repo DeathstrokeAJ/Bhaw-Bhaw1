@@ -420,7 +420,7 @@ const ProductDetails = () => {
 
   const handleCartAction = async () => {
     if (!user) {
-      router.push("/Signin");
+      router.push("/signin");
       return;
     }
     if (isProductInCart) {
@@ -433,7 +433,7 @@ const ProductDetails = () => {
 
   const handleWishlistAction = async () => {
     if (!user) {
-      router.push("/Signin");
+      router.push("/signin");
       return;
     }
     if (isInWishlist) {

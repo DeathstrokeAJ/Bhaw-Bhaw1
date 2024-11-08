@@ -1,26 +1,33 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext"; // Ensure this path is correct
-import logo from "../../../public/images/signin/Group.jpg";
+import logo from "../../../../public/images/signin/Group.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
-import { db } from "../../../firebaseConfig";
 import { getDocs, collection, query, where } from "firebase/firestore";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "@/redux/userSlice";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../../../../firebaseConfig";
 
 const SignInForm = () => {
   const router = useRouter();
-  const { user, setUser } = useAuth();  // Access user and setUser
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userData);
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Redirect if the user is already signed in
   useEffect(() => {
-    if (user) {
-      toast.success("Login successful");
-      router.push("/"); // Redirect to home or desired page
-    }
+    // Check if user is already signed in on component mount
+    const checkAuthState = async () => {
+      if (user?.name) {
+        toast.success("Login successful");
+        router.push("/");
+      }
+    };
+    checkAuthState();
   }, [user, router]);
 
   const handleSubmit = async (e) => {
@@ -29,25 +36,37 @@ const SignInForm = () => {
 
     try {
       const usersRef = collection(db, "users");
-      const q = query(usersRef, where("username", "==", username));
+
+      const q = query(usersRef, where("email", "==", email));
+      
       const querySnapshot = await getDocs(q);
-
-      let userFound = false;
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        if (userData.password === password) {
-          userFound = true;
-          setUser({ uid: doc.id, ...userData }); // Set user data in context
-          toast.success("Login successful");
-          router.push("/"); // Redirect to home or desired page
-        }
-      });
-
-      if (!userFound) {
-        toast.error("Incorrect username or password");
+      
+      if (querySnapshot.empty) {
+        toast.error("No user found with this email");
+        setLoading(false);
+        return;
       }
+
+      const userDoc = querySnapshot.docs[0];
+      const userEmail = userDoc.data().email;
+
+      await signInWithEmailAndPassword(auth, userEmail, password);
+
+      dispatch(
+        setUser({
+          userData: {
+            name: userDoc.data().name,
+            email: email,
+          },
+          userId: userDoc.id,
+        })
+      );
+      
+      toast.success("Login successful");
+      router.push("/");
+
     } catch (error) {
-      console.error("Error in login", error);
+      console.error("Error signing in:", error);
       toast.error("An error occurred during login");
     } finally {
       setLoading(false);
@@ -64,16 +83,16 @@ const SignInForm = () => {
       <h1 className="text-left text-4xl font-bold mb-6">Sign in</h1>
       <form className="mt-10" onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-black text-sm mb-2 font-poppins" htmlFor="username">
-            Username
+          <label className="block text-black text-sm mb-2 font-poppins" htmlFor="email">
+            Email
           </label>
           <input
             type="text"
-            id="username"
-            className="w-full p-3 bg-baw-input rounded-sm text-gray-900 focus:outline-none focus:border-red-400"
+            id="email"
+            className="w-full p-3 bg-gray-100 rounded-sm text-gray-900 focus:outline-none focus:border-red-400"
             required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
@@ -86,7 +105,7 @@ const SignInForm = () => {
             <input
               type="password"
               id="password"
-              className="w-full p-3 bg-baw-input rounded-sm text-gray-900 focus:outline-none focus:border-red-400"
+              className="w-full p-3 bg-gray-100 rounded-sm text-gray-900 focus:outline-none focus:border-red-400"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

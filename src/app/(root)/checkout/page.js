@@ -1,14 +1,19 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
-import { useAuth } from '../../app/context/AuthContext';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "@/redux/cartSlice";
+import { ClipLoader } from "react-spinners";
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const cartItems = useSelector((state) => state.cart.items);
+
   const [formData, setFormData] = useState({
-    email: "",
+    email: user.email || "",
     firstName: "",
     lastName: "",
     address: "",
@@ -19,172 +24,87 @@ const CheckoutPage = () => {
     checked: false,
   });
   
-  const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const { user } = useAuth();
-  const db = getFirestore();
 
-  // Redirect if no user
   useEffect(() => {
-    if (!user) {
-      router.push('/Signin');
-    }
-  }, [user, router]);
-
-  // Fetch cart items and calculate totals
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      if (!user?.uid) return;
-    
-      try {
-        setLoading(true);
-        const userDocRef = doc(db, "users", user.uid);
-        const cartSnapshot = await getDocs(collection(userDocRef, "cart"));
-        const items = cartSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          quantity: doc.data().quantity || 1 // Default to 1 if quantity is missing
-        }));
-        
-        setCartItems(items);
-        
-        // Calculate totals
-        const itemSubtotal = items.reduce((sum, item) => {
-          const price = parseFloat(item.price) || 0;
-          const quantity = parseInt(item.quantity) || 1;
-          return sum + (price * quantity);
-        }, 0);
-        
-        setSubtotal(itemSubtotal);
-        setTotal(itemSubtotal); // Add shipping cost if needed
-        
-        // Store in session
-        sessionStorage.setItem("subtotal", itemSubtotal.toString());
-        sessionStorage.setItem("total", itemSubtotal.toString());
-        
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching cart:", err);
-        setError("Failed to load cart items");
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
-  }, [db, user]);
+    const calculatedSubtotal = cartItems.reduce((acc, item) => {
+      return acc + (item.sellingPrice * (item.quantity || 1));
+    }, 0);
+    setSubtotal(calculatedSubtotal);
+    setTotal(calculatedSubtotal);
+  }, [cartItems]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleContinueShipping = async (e) => {
+  const handleContinueShipping = (e) => {
     e.preventDefault();
-    if (!user?.uid) {
-      setError("Please sign in to continue");
-      return;
-    }
-
-    // Check if all required fields are filled
-    const { email, firstName, lastName, address, apartment, state, city, postalCode } = formData;
+    const { email, firstName, lastName, address, state, city, postalCode } = formData;
     if (!email || !firstName || !lastName || !address || !state || !city || !postalCode) {
       setError("All fields are required.");
       return;
     }
-
-    try {
-      const shippingId = `SID ${Date.now()}`;
-      await setDoc(doc(db, "users", user.uid, "shipping", shippingId), {
-        ...formData,
-        createdAt: new Date().toISOString()
-      });
-      // Continue with checkout flow
-      setError(null); // Clear any previous error
-    } catch (err) {
-      console.error("Error saving shipping info:", err);
-      setError("Failed to save shipping information");
-    }
+    setError(null);
   };
 
 
   const handleProceedToPayment = async () => {
-    if (!user?.uid) {
-      setError("Please sign in to continue");
-      return;
-    }
-
+    const orderData = {
+      userId: user.userId,
+      cartItems: cartItems, 
+      paymentMethod: 'COD',
+      shippingAddress: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        apartment: formData.apartment,
+        state: formData.state,
+        city: formData.city,
+        postalCode: formData.postalCode,
+      },
+      email: formData.email,
+      notification: formData.checked,
+      totalAmount: subtotal
+    };
+  
     try {
-      // Create order
-      await pushOrderDetails();
-      // Clear cart
-      await clearCart();
-      // Show success popup
-      setIsPopupVisible(true);
-      // Reset totals
-      setSubtotal(0);
-      setTotal(0);
-      // Clear session storage
-      sessionStorage.removeItem("subtotal");
-      sessionStorage.removeItem("total");
+      setLoading(true)
+      const response = await fetch('/api/checkout/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+  
+      if (response.ok) {
+        setIsPopupVisible(true);
+        setSubtotal(0);
+        setTotal(0);
+        dispatch(clearCart());
+      } else {
+        setError("Failed to process payment");
+      }
     } catch (err) {
       console.error("Error processing payment:", err);
       setError("Failed to process payment");
+    } finally {
+      setLoading(false)
     }
-  };
-
-  const pushOrderDetails = async () => {
-    const orderId = `OID${Date.now()}`;
-    const orderData = {
-      userId: user.uid,
-      products: cartItems,
-      shippingDetails: formData,
-      totalAmount: total,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-
-    await setDoc(doc(db, "orders", orderId), orderData);
-  };
-
-  const clearCart = async () => {
-    if (!user?.uid) return;
-    
-    const userDocRef = doc(db, "users", user.uid);
-    const cartRef = collection(userDocRef, "cart");
-    
-    const cartSnapshot = await getDocs(cartRef);
-    const deletePromises = cartSnapshot.docs.map(doc => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
-    setCartItems([]);
-  };
+  }; 
 
   const closePopup = () => {
     setIsPopupVisible(false);
-    router.push('/products'); // Redirect to products page after order
+    router.push('/products');
   };
-
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen text-red-500">
-        {error}
-      </div>
-    );
-  }
-
-
-  const username = user?.username.split('@')[0] || "User";
 
   return (
     <div className="font-poppins py-6 text-black bg-white">
@@ -194,7 +114,7 @@ const CheckoutPage = () => {
         }
       `}</style>
       <div className="bg-[#e4d5d0] py-8 lg:py-16 px-10 lg:px-36 mb-6">
-        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello {username}</h1>
+        <h1 className="text-lg lg:text-xl font-bold text-left text-[#15245E]">Hello {user.userData.username} !!</h1>
       </div>
       <div className="flex flex-col lg:flex-row lg:justify-between mx-auto lg:mx-16 gap-6 lg:gap-0">
         <div className="w-full lg:w-8/12">
@@ -254,13 +174,13 @@ const CheckoutPage = () => {
               {cartItems.map((item, index) => (
                 <div key={index} className="mb-4">
                   <div className="flex justify-between items-center">
-                    <img src={item.images} alt={item.title} className="w-16 h-12 lg:w-24 lg:h-16 object-cover rounded-lg" />
+                    <img src={item.images} alt={item.title} className="w-16 h-12 lg:w-20 mx-2 lg:h-16 object-cover rounded-lg" />
                     <div className="flex-1 text-sm lg:text-base">
                       <h3 className="font-semibold text-sm text-black mb-2">{item.title}</h3>
                       <p className="mb-1 text-sm">Size: {item.size}</p>
-                      <p className="text-sm">Qnt: {item.quantity}</p>
+                      <p className="text-sm">Qnt: {item.quantity || 1}</p>
                     </div>
-                    <span className="font-semibold text-xs text-[#15245E]">INR {item.price}</span>
+                    <span className="font-semibold text-xs text-[#15245E]">INR {item.sellingPrice}</span>
                   </div>
                   <hr className="my-4" />
                 </div>
@@ -283,8 +203,11 @@ const CheckoutPage = () => {
             <button
               className="bg-[#E57A7A] text-white mt-10 mb-6 w-full py-3 rounded-md font-semibold"
               onClick={handleProceedToPayment}
+              disabled={loading}
             >
-              Proceed to Payment
+              {
+                loading ? <ClipLoader size={20} color="#fff" className="mx-10"/> : "Proceed to Payment"
+              }
             </button>
           </div>
         </div>

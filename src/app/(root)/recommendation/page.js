@@ -1,41 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import ProductCard from "../../components/ProductCard";
-import { FaArrowRightLong, FaArrowLeftLong } from "react-icons/fa6"; 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebaseConfig";
-import { useAuth } from '../context/AuthContext'; // Import the useAuth hook
+import { useSelector, useDispatch } from "react-redux";
+import ProductCard from "../../../components/ProductCard";
+import { FaArrowRightLong, FaArrowLeftLong } from "react-icons/fa6";
+import Protected from "@/components/ProtectedRoute";
 
 const productsPerPage = 3;
 
 const Recommendation = () => {
-  const { user } = useAuth(); // Get the user from AuthContext
-  const [wishlistProducts, setWishlistProducts] = useState([]);
+  const dispatch = useDispatch();
+  const wishlistProducts = useSelector((state) => state.wishlist.items);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentForYouPage, setCurrentForYouPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchWishlistProducts = async () => {
-    if (!user || !user.uid) return;
-    // Wait until userId is available
-    setLoading(true);
-    try {
-      const wishlistRef = collection(db, "users", user.uid, "wishlist");
-      const snapshot = await getDocs(wishlistRef);
-      const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setWishlistProducts(products);
-    } catch (error) {
-      setError("Error fetching wishlist products");
-      console.error("Error fetching wishlist products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWishlistProducts();
-  }, [user]); // Add user as a dependency
 
   // Pagination logic for wishlist products
   const totalWishlistPages = Math.ceil(wishlistProducts.length / productsPerPage);
@@ -80,9 +56,6 @@ const Recommendation = () => {
   const wishlistPaginationNumbers = getPaginationNumbers(currentPage, totalWishlistPages);
   const forYouPaginationNumbers = getPaginationNumbers(currentForYouPage, totalForYouPages);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-
   return (
     <div className="lg:px-12 bg-white text-black p-6 font-poppins">
       <div className="mb-6">
@@ -96,7 +69,7 @@ const Recommendation = () => {
             ))}
           </div>
         )}
-        
+
         <div className="flex justify-center mt-4 font-kiwi items-center">
           <div
             className={`cursor-pointer mr-12 ${currentPage === 1 ? "text-[#C4B0A9]" : "text-[#85716B]"}`}
@@ -105,7 +78,7 @@ const Recommendation = () => {
           >
             <FaArrowLeftLong size={24} />
           </div>
-          
+
           {wishlistPaginationNumbers.map((pageNumber) => (
             <button
               key={pageNumber}
@@ -116,7 +89,7 @@ const Recommendation = () => {
               {pageNumber}
             </button>
           ))}
-          
+
           <div
             className={`cursor-pointer ml-12 ${currentPage === totalWishlistPages ? "text-[#C4B0A9]" : "text-[#85716B]"}`}
             onClick={() => currentPage < totalWishlistPages && setCurrentPage(currentPage + 1)}
@@ -174,4 +147,4 @@ const Recommendation = () => {
   );
 };
 
-export default Recommendation;
+export default Protected(Recommendation);

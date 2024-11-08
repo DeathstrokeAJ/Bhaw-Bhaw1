@@ -1,13 +1,38 @@
-// redux/store.js
-import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './userSlice';
-import newsletterReducer from './newsletterSlice';
+"use client"
 
-const store = configureStore({
-  reducer: {
-    user: userReducer,
-    newsletter: newsletterReducer,
-  },
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import userReducer from "./userSlice";
+import cartReducer from "./cartSlice";
+import serviceReducer from "./serviceSlice";
+import wishlistReducer from "./wishlistSlice";
+
+const persistConfig = {
+  key: "root",
+  storage: storage.default || storage,
+  whitelist: ["cart", "wishlist"],
+};
+
+const rootReducer = combineReducers({
+  user: userReducer,
+  cart: cartReducer,
+  wishlist: wishlistReducer,
+  service: serviceReducer
 });
 
-export default store;
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+      },
+    }),
+});
+
+const persistor = persistStore(store);
+
+export { store, persistor };

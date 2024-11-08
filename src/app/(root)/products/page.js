@@ -1,6 +1,9 @@
+"use client"
+
 import ConnectNewsletter from '@/components/ConnectNewsletter'
 import PetCategories from '@/components/Petcategories'
 import ProductGrid from '@/components/ProductGrid'
+import Protected from '@/components/ProtectedRoute'
 import React from 'react'
 
 const page = () => {
@@ -13,4 +16,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Protected(page)

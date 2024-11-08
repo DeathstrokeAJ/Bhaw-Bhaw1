@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FiMenu } from "react-icons/fi";
-import { useAuth } from "../app/context/AuthContext"; // Ensure this import path is correct
+import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { clearUser } from "@/redux/userSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, handleLogout } = useAuth(); // Use handleLogout instead of logout
+  const user = useSelector((state) => state.user.userId);
+  const dispatch = useDispatch();
   const router = useRouter();
 
   const toggleDrawer = () => {
@@ -15,9 +17,8 @@ const Navbar = () => {
   };
 
   const onLogout = () => {
-    handleLogout(); // Calls the function from AuthContext
-    console.log("User logged out");
-    router.push("/Signin"); 
+    dispatch(clearUser());
+    router.push("/signin");
   };
 
   return (
@@ -63,40 +64,42 @@ const Navbar = () => {
 
         {/* Icons and Buttons */}
         <div className="flex items-center space-x-4 ml-auto">
-          <Link href="/recommendation">
-            <button>
-              <img
-                src="/images/navbar/heart.png"
-                alt="Wishlist"
-                className="w-6 h-6"
-              />
-            </button>
-          </Link>
-          <Link href="/cart">
-            <button>
-              <img
-                src="/images/navbar/cart.png"
-                alt="Cart"
-                className="w-6 h-6"
-              />
-            </button>
-          </Link>
           {user ? (
-            <button onClick={onLogout}>
-              <img
-                src="/images/navbar/profile.png"
-                alt="Profile"
-                className="w-6 h-6 mb-2"
-              />
-            </button>
+            <>
+              <Link href="/recommendation">
+                <button>
+                  <img
+                    src="/images/navbar/heart.png"
+                    alt="Wishlist"
+                    className="w-6 h-6"
+                  />
+                </button>
+              </Link>
+              <Link href="/cart">
+                <button>
+                  <img
+                    src="/images/navbar/cart.png"
+                    alt="Cart"
+                    className="w-6 h-6"
+                  />
+                </button>
+              </Link>
+              <button onClick={onLogout}>
+                <img
+                  src="/images/navbar/profile.png"
+                  alt="Profile"
+                  className="w-6 h-6 mb-2"
+                />
+              </button>
+            </>
           ) : (
             <>
-              <Link href="/Signin">
+              <Link href="/signin">
                 <button className="text-[#8E8E8E] px-3 py-1 rounded-md">
                   LOGIN
                 </button>
               </Link>
-              <Link href="/Signin">
+              <Link href="/signin">
                 <button className="flex items-center justify-between w-full bg-black text-white px-8 py-2 rounded-full">
                   <p>Sign up now</p>
                   <img
