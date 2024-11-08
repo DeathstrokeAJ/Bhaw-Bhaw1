@@ -99,7 +99,7 @@ const ContactUs = () => {
       <div className="flex flex-col items-center text-black p-8 font-poppins bg-white lg:px-16">
         <h1 className="lg:text-8xl text-4xl font-extrabold text-[#85716B]">Contact us</h1>
         <p className="text-center lg:mx-32 text-gray-600 mt-2">
-          We know your pets are cherished members of your family. That's why we provide loving, personalized pet sitting services tailored to their needs.
+          We know your pets are cherished members of your family. That&apos;s why we provide loving, personalized pet sitting services tailored to their needs.
         </p>
 
         <div className="mt-8 w-full p-6 rounded-lg border border-[#F3EAE7]">

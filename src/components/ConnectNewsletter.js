@@ -57,7 +57,7 @@ const ConnectNewsletter = ({ bg = "#C9ABA0" }) => {
     <div className="py-16 md:py-20 font-poppins" style={{ backgroundColor: bg }}>
       <div className="container mx-auto text-center px-4">
         <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold text-white mb-4 leading-tight tracking-wider">
-          Let's Connect Our Newsletter
+          Let&apos;s Connect Our Newsletter
         </h2>
         <p className="text-white md:mb-8 lg:mx-52 leading-relaxed tracking-wide">
           Stay updated with the latest grooming tips, offers, and pet care advice by subscribing to our newsletter.

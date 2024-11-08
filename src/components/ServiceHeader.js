@@ -11,7 +11,7 @@ const PetJoySection = () => {
             WHERE EVERY 
           </h1>
           <h1 className="text-4xl md:text-7xl font-bold mb-4 font-staatliches text-[#4D413E]">
-            PET'S JOY BEGINS!
+            PET&apos;S JOY BEGINS!
           </h1>
           <p className="text-[#4D413E] text-base md:text-lg mb-3 mx-4 lg:mx-64 md:mx-0 md:mb-6 font-poppins">
             We know your pets are cherished members of your family.

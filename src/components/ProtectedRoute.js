@@ -9,7 +9,7 @@ import { setUser } from "@/redux/userSlice";
 import { ClipLoader } from "react-spinners";
 
 const Protected = (WrappedComponent) => {
-  return (props) => {
+  const ComponentWithProtection = (props) => {
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const router = useRouter();
@@ -29,11 +29,10 @@ const Protected = (WrappedComponent) => {
               const userDoc = querySnapshot.docs[0];
               const userData = userDoc.data();
 
-              console.log(userData)
+              console.log(userData);
               dispatch(
                 setUser({
-                  userData: { ...userData
-                  },
+                  userData: { ...userData },
                   userId: userDoc.id,
                 })
               );
@@ -44,19 +43,19 @@ const Protected = (WrappedComponent) => {
               auth.signOut();
               router.push("/");
 
-              console.log('User not found. Logging out.');
+              console.log("User not found. Logging out.");
             }
           } catch (error) {
             console.error("Error fetching user data: ", error);
             toast.error("An error occurred.");
             router.push("/");
 
-            console.log('Error fetching user data. Logging out.');
+            console.log("Error fetching user data. Logging out.");
           }
         } else {
           router.push("/");
 
-          console.log('No user authenticated. Logging out.');
+          console.log("No user authenticated. Logging out.");
         }
 
         setLoading(false);
@@ -75,6 +74,10 @@ const Protected = (WrappedComponent) => {
 
     return isAuthorized ? <WrappedComponent {...props} /> : null;
   };
+
+  ComponentWithProtection.displayName = `Protected(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
+  
+  return ComponentWithProtection;
 };
 
 export default Protected;

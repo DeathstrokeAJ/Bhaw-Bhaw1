@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
-import ProductCard from "../../components/ProductCard";
+import ProductCard from "../../../components/ProductCard";
 import { CiStar } from "react-icons/ci";
 import { AiFillHeart, AiFillStar, AiOutlineHeart } from "react-icons/ai";
 import { FaArrowLeftLong, FaArrowRightLong } from "react-icons/fa6"; // Ensure you import the pagination arrows
-import { db } from '../../../firebaseConfig';
+import { db } from '../../../../firebaseConfig';
 import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../../app/context/AuthContext';
-import { CartWishlistContext } from '../../app/context/CartWishlistContext';
+import { AuthContext } from '../../../app/context/AuthContext';
+import { CartWishlistContext } from '../../../app/context/CartWishlistContext';
 
 const ProductDetail = () => {
   const router = useRouter();
