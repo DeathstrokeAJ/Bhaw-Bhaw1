@@ -17,6 +17,7 @@ export default async function handler(req, res) {
         ...formData,
         bookingID,
         userId,
+        status:'incoming',
         createdAt: new Date().toISOString(),
       });
 
