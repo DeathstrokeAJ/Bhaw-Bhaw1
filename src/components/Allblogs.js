@@ -72,7 +72,7 @@ const AllBlogs = () => {
           We know your pets are cherished members of your family. That’s why we provide loving,
           personalized pet sitting services tailored to their needs.
         </p>
-        <Link href="/order">
+        <Link href="/book-service">
         <button className="mt-6 bg-[#FFEB3B] text-black py-2 px-4 rounded text-xl">
           Book Now
         </button>
