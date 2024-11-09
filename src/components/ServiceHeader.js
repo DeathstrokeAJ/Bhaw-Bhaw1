@@ -18,7 +18,7 @@ const PetJoySection = () => {
             That’s why we provide loving, personalized pet sitting
             services tailored to their needs.
           </p>
-          <Link href="/order">
+          <Link href="/book-service">
             <button className="bg-[#FFEB3B] font-poppins text-black px-4 py-2 rounded-md text-sm md:text-base">
               Book Now
             </button>

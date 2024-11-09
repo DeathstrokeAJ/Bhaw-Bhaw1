@@ -7,7 +7,7 @@ const Appointment = () => {
       <div className='flex flex-col sm:flex-row items-center'>
         <div className="flex-1">
           <h2 className="lg:text-6xl text-4xl leading-tight  font-bold lg:leading-tight">Schedule your appointment today</h2>
-          <Link href="/order">          
+          <Link href="/book-service">          
             <button className="mt-4 bg-[#FFEB3B] text-black py-2 px-4 rounded-full">
             Book Now
           </button>
