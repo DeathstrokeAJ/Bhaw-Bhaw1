@@ -5,13 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import { ClipLoader } from "react-spinners";
+import { loadAddresses } from "@/redux/addressesSlice"; // import action to load saved addresses
 
 const CheckoutPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const cartItems = useSelector((state) => state.cart.items);
-
+  const subtotal = useSelector((state) => state.cart.subtotal);
+  const total = useSelector((state) => state.cart.total);
+  const savedAddresses = useSelector((state) => state.addresses.savedAddresses); // Select saved addresses from Redux
+  const [deliveryFee] = useState(15);
   const [formData, setFormData] = useState({
     email: user.email || "",
     firstName: "",
@@ -23,21 +27,13 @@ const CheckoutPage = () => {
     postalCode: "",
     checked: false,
   });
-  
-  const [subtotal, setSubtotal] = useState(0);
-  const [total, setTotal] = useState(0);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
 
   useEffect(() => {
-    const calculatedSubtotal = cartItems.reduce((acc, item) => {
-      return acc + (item.sellingPrice * (item.quantity || 1));
-    }, 0);
-    setSubtotal(calculatedSubtotal);
-    setTotal(calculatedSubtotal);
-  }, [cartItems]);
+    dispatch(loadAddresses(savedAddresses)); // Load saved addresses on component mount
+  }, [dispatch, savedAddresses]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -57,11 +53,10 @@ const CheckoutPage = () => {
     setError(null);
   };
 
-
   const handleProceedToPayment = async () => {
     const orderData = {
       userId: user.userId,
-      cartItems: cartItems, 
+      cartItems: cartItems,
       paymentMethod: 'COD',
       shippingAddress: {
         firstName: formData.firstName,
@@ -74,21 +69,19 @@ const CheckoutPage = () => {
       },
       email: formData.email,
       notification: formData.checked,
-      totalAmount: subtotal
+      totalAmount: total,
     };
-  
+
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch('/api/checkout/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
       });
-  
+
       if (response.ok) {
         setIsPopupVisible(true);
-        setSubtotal(0);
-        setTotal(0);
         dispatch(clearCart());
       } else {
         setError("Failed to process payment");
@@ -97,9 +90,9 @@ const CheckoutPage = () => {
       console.error("Error processing payment:", err);
       setError("Failed to process payment");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }; 
+  };
 
   const closePopup = () => {
     setIsPopupVisible(false);
@@ -142,10 +135,38 @@ const CheckoutPage = () => {
                   onChange={handleChange}
                 />
                 <span className="text-sm text-[#676767]">Keep me up to date on news and exclusive offers</span>
+                
               </div>
             </div>
             <div className="p-6 rounded-lg">
-              <h3 className="text-lg lg:text-xl text-[#1D3178] font-extrabold my-4">Shipping address</h3>
+            <div className="flex items-center justify-between my-4">
+  <h3 className="text-lg lg:text-xl text-[#1D3178] font-extrabold">Shipping address</h3>
+  <div className="flex justify-end">
+    <Link href="/saved-addresses">
+      <button
+        className="bg-[#E57A7A] text-white mt-10 lg:mt-28 mb-10 px-6 py-3 rounded-md font-semibold w-full lg:w-auto"
+      >
+        Saved Addresses
+      </button>
+    </Link>
+  </div>
+</div>
+
+              {savedAddresses.length > 0 ? (
+                savedAddresses.map((address, index) => (
+                  <div key={index}>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, ...address })}
+                      className="w-full py-3 text-sm mb-7 focus:outline-none bg-[#fdfafa] border-b-2 border-gray-300"
+                    >
+                      {address.firstName} {address.lastName}, {address.city}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p>No saved addresses available</p>
+              )}
               {["firstName", "lastName", "address", "apartment", "state", "city", "postalCode"].map((field) => (
                 <input
                   key={field}
@@ -157,14 +178,12 @@ const CheckoutPage = () => {
                   onChange={handleChange}
                 />
               ))}
-              <Link href="/products">
-                <button
-                  className="bg-[#E57A7A] text-white mt-10 lg:mt-28 mb-10 px-6 py-3 rounded-md font-semibold w-full lg:w-auto"
-                  onClick={handleContinueShipping}
-                >
-                  Continue Shipping
-                </button>
-              </Link>
+              <button
+                className="bg-[#E57A7A] text-white mt-10 lg:mt-28 mb-10 px-6 py-3 rounded-md font-semibold w-full lg:w-auto"
+                onClick={handleContinueShipping}
+              >
+                Continue Shipping
+              </button>
             </div>
           </div>
         </div>
@@ -192,36 +211,32 @@ const CheckoutPage = () => {
               <span className="text-[#6e6e6e]">Subtotal</span>
               <span className="font-semibold text-black">INR {subtotal}</span>
             </div>
-            <div className="flex justify-between mb-2">
-              <span className="text-[#6e6e6e]">Shipping</span>
-              <span className="font-semibold text-black">Free</span>
+            <div className="flex justify-between mb-4">
+              <span className="text-[#6e6e6e]">Delivery Fee</span>
+              <span className="font-semibold text-black">INR {deliveryFee}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-[#6e6e6e]">Total</span>
-              <span className="font-semibold text-black">INR {total}</span>
+              <span className="font-semibold text-black">INR {total + deliveryFee}</span>
             </div>
             <button
-              className="bg-[#E57A7A] text-white mt-10 mb-6 w-full py-3 rounded-md font-semibold"
+              className="w-full text-white font-semibold bg-[#E57A7A] py-4 rounded-md mt-5"
               onClick={handleProceedToPayment}
-              disabled={loading}
             >
-              {
-                loading ? <ClipLoader size={20} color="#fff" className="mx-10"/> : "Proceed to Payment"
-              }
+              {loading ? <ClipLoader color="#fff" loading={loading} size={24} /> : "Proceed to Payment"}
             </button>
           </div>
         </div>
       </div>
       {isPopupVisible && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="text-lg font-bold mb-4">Order Placed!</h3>
-            <p>Your order has been successfully placed. Thank you!</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-lg text-center">
+            <h3 className="text-lg text-[#1D3178]">Order Placed Successfully!</h3>
             <button
-              className="mt-4 bg-[#E57A7A] text-white px-4 py-2 rounded"
+              className="bg-[#E57A7A] text-white px-6 py-3 rounded-md font-semibold mt-6"
               onClick={closePopup}
             >
-              Close
+              Continue Shopping
             </button>
           </div>
         </div>
