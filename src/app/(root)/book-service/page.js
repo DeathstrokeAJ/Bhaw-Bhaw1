@@ -3,7 +3,7 @@ import CalendarAndSlot from '../../../components/CalenderAndSlots';
 import ContactInformation from '../../../components/ContactInformation';
 import ReviewInformation from '../../../components/ReviewInformation';
 import React, { useEffect, useState } from 'react';
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../../firebaseConfig";
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,11 +23,30 @@ const MultiStepForm = () => {
     calendarAndSlot: {},
   });
 
+  // State for saved addresses
+  const [savedAddresses, setSavedAddresses] = useState([]);
+
   useEffect(() => {
     if (!selectedService) {
       router.push('/');
     }
-  }, [selectedService, router]);
+
+    // Fetch saved addresses from Firestore
+    const fetchSavedAddresses = async () => {
+      try {
+        const userDoc = doc(db, "users", userId);
+        const userSnapshot = await getDoc(userDoc);
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          setSavedAddresses(userData.savedAddresses || []); // Assuming the addresses are stored in the `savedAddresses` field
+        }
+      } catch (error) {
+        console.error("Error fetching saved addresses:", error);
+      }
+    };
+
+    fetchSavedAddresses();
+  }, [selectedService, router, userId]);
 
   const nextStep = () => {
     if (!visitedSteps.includes(step)) {
@@ -90,12 +109,12 @@ const MultiStepForm = () => {
 
     if (response.ok) {
       toast.success('Booking successful');
-      dispatch(clearBookingData())
+      dispatch(clearBookingData());
     } else {
       console.error('Booking failed');
     }
   };
-  
+
   return (
     <div className="flex px-10 flex-col bg-white items-center justify-center font-montserrat">
       <div className="w-full bg-white p-8 rounded-lg">
@@ -128,6 +147,7 @@ const MultiStepForm = () => {
             nextStep={nextStep}
             handleFormDataChange={(data) => handleFormDataChange('contactInfo', data)}
             formData={formData.contactInfo}
+            savedAddresses={savedAddresses} // Pass the saved addresses to the contact information step
           />
         )}
         {step === 2 && (

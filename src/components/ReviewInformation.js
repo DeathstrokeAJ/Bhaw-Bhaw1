@@ -99,7 +99,7 @@ const ReviewInformation = ({
                     className="w-32 h-32 mb-7"
                   />
                   <p className="text-lg font-semibold mb-2">Your booking was successful!</p>
-                  <Link href="/bookings" className="bg-[#F33877] text-white px-8 py-2 rounded mt-4">
+                  <Link href="/mybookings" className="bg-[#F33877] text-white px-8 py-2 rounded mt-4">
                     View Bookings
                   </Link>
                 </div>
