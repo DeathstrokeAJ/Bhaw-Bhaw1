@@ -304,7 +304,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { removeFromCart, updateQuantity, setDiscount } from "@/redux/cartSlice";
 import { ClipLoader } from "react-spinners";
 import Protected from "@/components/ProtectedRoute";
-
+import Link from "next/link"
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const subtotal = useSelector((state) => state.cart.subtotal);
@@ -463,6 +463,14 @@ const Cart = () => {
           <button className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4" onClick={handleProceedToCheckout}>
             <p>Proceed to Checkout</p>
           </button>
+          <Link href="/my-orders">
+              <button
+                className="w-full bg-[#E57A7A] text-white py-3 rounded-full mt-4"
+                
+              >
+                 View My Orders
+              </button>
+              </Link>
         </div>
       </div>
 
