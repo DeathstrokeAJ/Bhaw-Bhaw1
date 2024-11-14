@@ -100,7 +100,7 @@ const SavedAddresses = () => {
   };
 
   return (
-    <div className="flex flex-col items-center bg-gray-100 py-10 px-4">
+    <div className="flex flex-col items-center bg-white text-black py-10 px-4">
       <h1 className="text-2xl font-bold mb-6">Saved Addresses</h1>
 
       {/* Address Form */}
