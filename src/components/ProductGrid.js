@@ -73,17 +73,24 @@ const ProductGrid = () => {
 
   // Function to filter products based on price range
   const handleFilter = ({ min, max }) => {
-    const minPrice = parseFloat(min) || 0;
-    const maxPrice = parseFloat(max) || Infinity;
-
+    const minPrice = parseFloat(min);
+    const maxPrice = parseFloat(max);
+  
+    if (isNaN(minPrice) || isNaN(maxPrice)) {
+      return;
+    }
+  
     const filtered = productData.filter((product) => {
-      const price = parseFloat(product.price);
-      return price >= minPrice && price <= maxPrice;
+      const price = parseFloat(product.sellingPrice);
+      return price >= (minPrice || 0) && price <= (maxPrice || Infinity);
     });
-
+  
     setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to the first page after filtering
+    setCurrentPage(1);
+  
+  
   };
+  
 
   // Function to add product to cart
   const addToCart = async (product) => {

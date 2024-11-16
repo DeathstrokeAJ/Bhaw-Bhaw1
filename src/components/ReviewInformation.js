@@ -45,7 +45,7 @@ const ReviewInformation = ({
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg">
+    <div className="p-6 bg-white rounded-lg shadow-lg text-black">
       
           <h2 className="text-lg font-bold mb-4">Review Your Information</h2>
           <h3 className="text-md font-semibold">Contact Information:</h3>
