@@ -11,18 +11,18 @@ const ProductGrid = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
-  const [userId, setUserId] = useState(null); // State for user ID
-
+  const [userId, setUserId] = useState(null);
+  
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const products = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProductData(products);
-        setFilteredProducts(products);
+        const response = await fetch("/api/products/getProducts");
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        const products = await response.json();
+        setProductData(products.products);
+        setFilteredProducts(products.products);
       } catch (error) {
         console.error("Error fetching products:", error);
       }

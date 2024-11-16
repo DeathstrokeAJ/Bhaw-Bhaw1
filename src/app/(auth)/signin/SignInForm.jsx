@@ -73,7 +73,7 @@ const SignInForm = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-3xl shadow-lg w-3/4 mx-auto max-lg:w-full lg:pt-10 lg:px-20 lg:pb-32">
+    <div className="bg-white max-h-screen p-8 rounded-3xl shadow-lg w-3/4 mx-auto max-lg:w-full lg:pt-10 lg:px-20 lg:pb-32">
       <Toaster />
       <div className="flex justify-start mb-7">
         <Image src={logo} alt="Logo" width={200} height={80} className="h-20" />

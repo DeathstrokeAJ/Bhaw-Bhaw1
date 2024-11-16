@@ -23,6 +23,11 @@ const ProductCard = ({ product, isRecommendation = false }) => {
 
 
   const handleCartAction = () => {
+    if (!user) {
+      toast.error("Please log in to add products to your cart.");
+      return;
+    }
+  
     if (isProductInCart) {
       dispatch(removeFromCart(product));
       toast.success("Product removed from cart");
@@ -31,8 +36,13 @@ const ProductCard = ({ product, isRecommendation = false }) => {
       toast.success("Product added to cart");
     }
   };
-
+  
   const handleWishlistAction = () => {
+    if (!user) {
+      toast.error("Please log in to manage your wishlist.");
+      return;
+    }
+  
     if (isInWishlist) {
       dispatch(removeFromWishlist(product));
       toast.success("Product removed from wishlist");

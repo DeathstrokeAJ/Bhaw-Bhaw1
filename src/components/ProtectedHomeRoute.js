@@ -5,13 +5,13 @@ import { getDocs, query, collection, where } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import { auth, db } from "../../firebaseConfig";
 import { useDispatch } from "react-redux";
-import { setUser } from "@/redux/userSlice"; 
+import { setUser } from "@/redux/userSlice";
 import { ClipLoader } from "react-spinners";
 
-const Protected = (WrappedComponent) => {
+const ProtectedHomeRoute = (WrappedComponent) => {
   const ComponentWithProtection = (props) => {
     const [loading, setLoading] = useState(true);
-    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [userData, setUserData] = useState(null);
     const router = useRouter();
     const dispatch = useDispatch();
 
@@ -37,32 +37,24 @@ const Protected = (WrappedComponent) => {
                 })
               );
 
-              setIsAuthorized(true);
+              setUserData(userData); // Save user data for authenticated users
             } else {
               toast.error("User not found.");
               auth.signOut();
-              router.push("/signin");
-
-              console.log("User not found. Logging out.");
             }
           } catch (error) {
             console.error("Error fetching user data: ", error);
             toast.error("An error occurred.");
-            router.push("/signin");
-
-            console.log("Error fetching user data. Logging out.");
           }
         } else {
-          router.push("/signin");
-
-          console.log("No user authenticated. Logging out.");
+          console.log("No user authenticated.");
         }
 
         setLoading(false);
       });
 
       return () => unsubscribe();
-    }, [dispatch, router]);
+    }, [dispatch]);
 
     if (loading) {
       return (
@@ -72,12 +64,18 @@ const Protected = (WrappedComponent) => {
       );
     }
 
-    return isAuthorized ? <WrappedComponent {...props} /> : null;
+    return (
+      <WrappedComponent
+        {...props}
+        isAuthenticated={!!userData}
+        userData={userData}
+      />
+    );
   };
 
-  ComponentWithProtection.displayName = `Protected(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
-  
+  ComponentWithProtection.displayName = `ProtectedHomeRoute(${WrappedComponent.displayName || WrappedComponent.name || "Component"})`;
+
   return ComponentWithProtection;
 };
 
-export default Protected;
+export default ProtectedHomeRoute;

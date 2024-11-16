@@ -1,5 +1,4 @@
 import React from "react";
-import Protected from "./ProtectedRoute";
 
 const PetSearchSection = () => {
   return (
@@ -54,4 +53,4 @@ const PetSearchSection = () => {
   );
 };
 
-export default Protected(PetSearchSection);
+export default PetSearchSection;

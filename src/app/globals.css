@@ -25,3 +25,32 @@ body {
     text-wrap: balance;
   }
 }
+
+.custom-prev-arrow, .custom-next-arrow {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  margin-right: 30px;
+  margin-top: 40px;
+  background-color: white;
+  color: black;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.custom-prev-arrow:hover, .custom-next-arrow:hover {
+  background-color: black;
+  color: white;
+}
+
+.custom-prev-arrow {
+  transform: rotate(0deg);
+}
+
+.custom-next-arrow {
+  transform: rotate(0deg);
+}
